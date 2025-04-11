@@ -1,0 +1,17 @@
+# Configuration for scraping metrics from different targets
+global:
+  scrape_interval: 30s # Production recommendation: 30s to 1 minute depending on use case
+  evaluation_interval: 30s # Same as scrape interval for optimal balance
+
+# Scraping configurations
+scrape_configs:
+  # Job for collecting metrics from the Next.js application
+  - job_name: "next-app"
+    # Static list of target endpoints to scrape
+    static_configs:
+      # Using the Docker service name to avoid hardcoding IP addresses
+      - targets: ["192.168.64.138:3000"]
+        labels:
+          environment: "development" # Add environment-specific labels for easy filtering
+    # Path where metrics endpoint is exposed in the Next.js app
+    metrics_path: "/api/metrics"

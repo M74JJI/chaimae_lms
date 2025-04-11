@@ -1,0 +1,45 @@
+# Receivers configuration - defines how the collector receives telemetry data
+receivers:
+  # OpenTelemetry Protocol (OTLP) receiver configuration
+  otlp:
+    protocols:
+      # gRPC endpoint for receiving OTLP data
+      grpc:
+        endpoint: "0.0.0.0:4317" # Can be restricted to a specific interface in production
+      # HTTP endpoint for receiving OTLP data
+      http:
+        endpoint: "0.0.0.0:4318" # Can be restricted to a specific interface in production
+
+# Processors configuration - defines how telemetry data is processed
+processors:
+  # Batch processor aggregates data before exporting
+  batch:
+    timeout: 500ms # Reduced timeout for faster processing in production
+    send_batch_size: 512 # Optimized batch size for better throughput in production
+
+# Exporters configuration - defines where telemetry data is sent
+exporters:
+  # Zipkin exporter configuration
+  zipkin:
+    endpoint: "http://zipkin:9411/api/v2/spans" # Zipkin server endpoint
+    format: proto # Use protobuf format for data
+    # Debug exporter for troubleshooting - disabled in production
+    # debug:
+
+# Extensions configuration - additional collector functionality
+extensions:
+  health_check: {} # Health check extension to ensure collector is healthy
+  pprof: # Profiling endpoint (use internally or with restricted access in production)
+    endpoint: :1888
+  zpages: # Diagnostic pages (use internally or with restricted access in production)
+    endpoint: :55679
+
+# Service configuration - ties together all the components
+service:
+  extensions: [pprof, zpages, health_check] # Enable all configured extensions
+  pipelines:
+    # Traces pipeline configuration
+    traces:
+      receivers: [otlp] # Use OTLP receiver
+      processors: [batch] # Process with batch processor
+      exporters: [zipkin] # Export to Zipkin
