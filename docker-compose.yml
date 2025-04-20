@@ -1,41 +1,6 @@
 version: "3.8"
 
 services:
-  next-app:
-    container_name: next-app
-    image: oven/bun:latest # You can pin or update based on latest
-    working_dir: /app
-    volumes:
-      - ./:/app
-    environment:
-      - NODE_ENV=development
-      - AUTH_SECRET=${AUTH_SECRET}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - FACEBOOK_CLIENT_ID=${FACEBOOK_CLIENT_ID}
-      - FACEBOOK_CLIENT_SECRET=${FACEBOOK_CLIENT_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
-      - GMAIL_SENDER_EMAIL=${GMAIL_SENDER_EMAIL}
-      - GMAIL_SENDER_PASSWORD=${GMAIL_SENDER_PASSWORD}
-      - HOST=${HOST}
-      - REDIS_URL=${REDIS_URL}
-      - NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-      - RECAPTCHA_SECRET=${RECAPTCHA_SECRET}
-      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
-      - OTEL_LOG_LEVEL=${OTEL_LOG_LEVEL}
-    command: >
-      sh -c "bun install && bun run dev"
-    ports:
-      - "3000:3000"
-    networks:
-      - monitoring
-    depends_on:
-      - prometheus
-      - loki
-      - grafana
-      - otel-collector
   # Grafana: For visualizing logs and metrics.
   grafana:
     container_name: grafana

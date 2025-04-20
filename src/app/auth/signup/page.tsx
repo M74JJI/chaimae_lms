@@ -1,4 +1,5 @@
 import { SignUpForm } from "@/modules/auth/components/forms";
+import AuthSide from "@/modules/auth/components/shared/auth-side";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,8 +15,17 @@ export const metadata: Metadata = {
  */
 export default function SignUpPage() {
   return (
-    <div className="h-[calc(100vh-5rem)] flex items-center justify-center p-2">
-      <SignUpForm />
-    </div>
+    <main>
+      <section className="p-0 flex items-center relative overflow-hidden h-[calc(100vh-5rem)]">
+        <div className="container mx-auo">
+          <div className="flex flex-wrap -mx-2">
+            <AuthSide />
+            <div className="w-full lg:w-1/2 mx-auto flex items-center justify-center px-2 lg:px-12">
+              <SignUpForm />
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

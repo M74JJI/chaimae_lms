@@ -13,7 +13,7 @@ type SignupSchemaKeys = keyof z.infer<typeof SignupSchema>;
 
 interface CustomFormFieldProps {
   control: Control<any>;
-  name: SignupSchemaKeys;
+  name: string;
   placeholder?: string;
   type?: "text" | "password";
   disabled?: boolean;

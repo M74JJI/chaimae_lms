@@ -109,10 +109,10 @@ export const SignInFormHandler = () => {
     );
 
   return (
-    <div className="w-[350px] relative overflow-hidden">
-      <Card>
+    <div className="w-full relative overflow-hidden">
+      <Card className="border-none">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign in</CardTitle>
+          <CardTitle className="text-4xl">👋 Sign in</CardTitle>
           <CardDescription>
             Join us today! Enter your credentials or sign in with a link.
           </CardDescription>

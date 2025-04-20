@@ -52,6 +52,6 @@ export async function register() {
     };
 
     // Optional: enable OpenTelemetry tracing if you're using Vercel Observability
-    registerOTel();
+    //registerOTel();
   }
 }

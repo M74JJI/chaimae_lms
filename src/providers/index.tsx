@@ -2,11 +2,15 @@
 
 import { SessionProvider } from "next-auth/react";
 import AppThemeProvider from "./theme-provider";
+import ModalProvider from "./modal-provider";
+import { auth } from "@/auth";
 
 export default function Provider({ children }: { children: React.ReactNode }) {
   return (
-    <AppThemeProvider>
-      <SessionProvider>{children}</SessionProvider>
-    </AppThemeProvider>
+    <SessionProvider>
+      <AppThemeProvider>
+        <ModalProvider>{children}</ModalProvider>
+      </AppThemeProvider>
+    </SessionProvider>
   );
 }

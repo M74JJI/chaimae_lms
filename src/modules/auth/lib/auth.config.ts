@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 export default {
   trustHost: true,
+  debug: true,
   providers: [
     Credentials({
       credentials: {

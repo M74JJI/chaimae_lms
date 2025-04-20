@@ -15,6 +15,7 @@ import FormField from "@/components/ui/form-field";
 import FormResponseMessage from "@/components/ui/form-response-message";
 import CaptchaBtnLoader from "@/components/ui/captcha-btn-loader";
 import BeatLoader from "react-spinners/BeatLoader";
+import AuthProvidersCTA from "./oauth-signin-options";
 
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useFormHandler } from "@/hooks/useFormHandler";
@@ -25,6 +26,7 @@ import { signUp } from "@/auth/services";
  *
  * Handles new user registration with built-in validation, ReCAPTCHA v3, and feedback messaging.
  */
+
 export const SignUpForm = () => {
   const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -53,8 +55,12 @@ export const SignUpForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="w-[350px]" noValidate>
-        <Card>
+      <form
+        onSubmit={handleSubmit}
+        className="w-full relative overflow-hidden"
+        noValidate
+      >
+        <Card className="border-none">
           <CardHeader>
             <CardTitle className="text-2xl">Create Your Account</CardTitle>
             <CardDescription>
@@ -136,6 +142,8 @@ export const SignUpForm = () => {
               </Link>
             </div>
           </CardContent>
+          {/* OAuth sign-in options */}
+          <AuthProvidersCTA />
         </Card>
       </form>
     </Form>

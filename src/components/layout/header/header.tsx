@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { MenuIcon, NextIcon } from "@/components/icons";
 import { links } from "@/data/navigation-links";
 
 import NavItem from "./nav-item";
+import { signOut } from "next-auth/react";
 
 const Header = () => {
   return (
@@ -43,16 +45,6 @@ const Header = () => {
       </Sheet>
 
       {/* Desktop Menu */}
-      <NavigationMenu className="hidden lg:flex">
-        <Link href="/" className="mr-6 hidden lg:flex" prefetch={false}>
-          <NextIcon />
-        </Link>
-        <NavigationMenuList>
-          {links.map((item, index) => (
-            <NavItem key={index} item={item} isDesktop={true} />
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
 
       {/* Authentication & Theme Toggle */}
       <div className="flex items-center gap-2">
@@ -63,6 +55,7 @@ const Header = () => {
           <Link href="/auth/signup">
             <Button variant="outline">Sign up</Button>
           </Link>
+          <Button onClick={() => signOut()}>Logout</Button>
         </div>
         <ThemeToggle />
       </div>

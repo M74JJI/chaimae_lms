@@ -45,7 +45,7 @@ export default function OAuthSignInOptions() {
           <button
             key={provider.id}
             onClick={() => handleSignIn(provider.id)}
-            className="w-full h-12 rounded-full flex justify-center items-center border cursor-pointer transition-all duration-200 ease-in-out hover:shadow-2xl focus:outline-none focus:ring-2"
+            className="w-12 h-12 rounded-full flex justify-center items-center border cursor-pointer transition-all duration-200 ease-in-out hover:shadow-2xl focus:outline-none focus:ring-2"
             aria-label={`Continue with ${provider.name}`}
           >
             <provider.Icon aria-hidden="true" />

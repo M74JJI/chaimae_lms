@@ -28,10 +28,46 @@ model User {
 
   accounts Account[] @relation("UserAccounts")
   sessions Session[] @relation("UserSessions")
+  instructorProfile InstructorProfile? @relation("UserInstructorProfile")
+  ownedCourses  UserCourse[]    @relation("UserCourses")
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model InstructorProfile {
+  id        String   @id @default(cuid())
+  bio       String?
+  website   String?
+
+  userId    String   @unique
+  user      User     @relation("UserInstructorProfile", fields: [userId], references: [id], onDelete: Cascade)
+
+  socialLinks SocialLinks? @relation("InstructorProfileSocialLinks")
+  courses   Course[] @relation("InstructorCourses") 
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLinks {
+  id                String   @id @default(cuid())
+  instructorProfileId String   @unique
+  twitter           String?
+  linkedin          String?
+  youtube           String?
+  facebook          String?
+  instagram         String?
+  github            String?
+
+  instructorProfile InstructorProfile @relation("InstructorProfileSocialLinks", fields: [instructorProfileId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 
 model Account {
   type              String
@@ -84,4 +120,179 @@ model ResetPasswordToken {
   expires    DateTime
 
   @@unique([email, token])
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  url        String       @unique
+
+  subcategories Subcategory[] @relation("CategorySubcategories")
+  courses     Course[]      @relation("CourseCategory") 
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Subcategory {
+  id          String       @id @default(cuid())
+  name        String
+  url        String       @unique
+  
+  categoryId  String
+  category    Category     @relation("CategorySubcategories", fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  courses     Course[]     @relation("CourseSubcategory")
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([categoryId, name])
+}
+
+
+
+model Course {
+  id              String         @id @default(cuid())
+  title           String
+  subtitle        String?
+  description     String? @db.Text
+  slug            String         @unique
+  price           Float?          @default(0.0)
+  thumbnail       String?
+  promotionalVideo String?
+  status          CourseStatus   @default(DRAFT)
+  difficultyLevel DifficultyLevel? @default(BEGINNER)
+  intendedLearners String[]  
+  prerequisites   String[]  
+  objectives      String[]  
+  duration        Float?          
+  welcomeMessage  String?
+  congratulationsMessage String?
+
+  instructorProfile InstructorProfile @relation("InstructorCourses", fields: [instructorProfileId], references: [id])
+  instructorProfileId String
+
+  category        Category       @relation("CourseCategory", fields: [categoryId], references: [id])
+  categoryId      String
+
+  subcategory     Subcategory?    @relation("CourseSubcategory", fields: [subcategoryId], references: [id])
+  subcategoryId   String?
+
+  language        Language?       @relation("CourseLanguage", fields: [languageId], references: [id])
+  languageId      String?
+
+  sections        Section[] @relation("CourseSections")
+
+  users           UserCourse[] @relation("UserCourses")
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model UserCourse {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation("UserCourses", fields: [userId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course  @relation("UserCourses", fields: [courseId], references: [id], onDelete: Cascade)
+  purchasedAt DateTime @default(now())
+  
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model Section {
+  id        String    @id @default(cuid())
+  title     String
+  description     String?
+  course    Course    @relation("CourseSections", fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String
+  lectures  Lecture[] @relation("SectionLectures")
+  order     Int       
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+enum LectureType {
+  VIDEO
+  QUIZ
+  EXERCISE
+}
+
+model Lecture {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  section     Section     @relation("SectionLectures", fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId   String
+  order       Int
+  type        LectureType  
+
+  // Optional 1:1 relations to type-specific models
+  videoLecture    VideoLecture?
+  quizLecture     QuizLecture?
+  exerciseLecture ExerciseLecture?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+model VideoLecture {
+  id          String    @id @default(cuid())
+  lecture     Lecture   @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId   String    @unique
+  videoUrl    String
+  duration    Int?
+  subtitles   String[]  // Array of subtitle URLs
+}
+
+model QuizLecture {
+  id          String    @id @default(cuid())
+  lecture     Lecture   @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId   String    @unique
+  questions   Question[] // Array of structured questions
+  passingScore Int?
+}
+model Question {
+  id           String    @id @default(cuid())
+  quizLecture  QuizLecture @relation(fields: [quizLectureId], references: [id], onDelete: Cascade)
+  quizLectureId String
+  question     String    
+  options      String[]  
+  correctIndex Int       
+  explanation  String?   
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ExerciseLecture {
+  id          String    @id @default(cuid())
+  lecture     Lecture   @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  lectureId   String    @unique
+  instructions String
+  solution    String?   // Optional solution or answer key
+}
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+  ALL
+}
+
+model Language {
+  id          String   @id @default(cuid())
+  code        String   @unique 
+  name        String   @unique 
+  native      String   @unique 
+  courses     Course[] @relation("CourseLanguage")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

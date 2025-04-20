@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import ForgotPasswordForm from "@/modules/auth/components/forms/forgot-password";
+import AuthSide from "@/modules/auth/components/shared/auth-side";
 
 export const metadata: Metadata = {
   title: "Forgot Password",
@@ -14,8 +15,17 @@ export const metadata: Metadata = {
  */
 export default function ForgotPasswordPage() {
   return (
-    <div className="h-[calc(100vh-5rem)] flex items-center justify-center p-2">
-      <ForgotPasswordForm />
-    </div>
+    <main>
+      <section className="p-0 flex items-center relative overflow-hidden h-[calc(100vh-5rem)]">
+        <div className="container mx-auo">
+          <div className="flex flex-wrap -mx-2">
+            <AuthSide />
+            <div className="w-full lg:w-1/2 mx-auto flex items-center justify-center px-2 lg:px-12">
+              <ForgotPasswordForm />
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

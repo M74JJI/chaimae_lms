@@ -29,6 +29,7 @@ import { ForgotPasswordSchema } from "../../schemas";
  * The form validates the email input, integrates with Google reCAPTCHA,
  * and submits the request to the backend for password reset instructions.
  */
+
 export default function ForgotPasswordForm() {
   const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -51,8 +52,8 @@ export default function ForgotPasswordForm() {
   const isLoading = captchaState.validating || loading;
 
   return (
-    <div className="w-[350px] relative overflow-hidden">
-      <Card>
+    <div className="w-full relative overflow-hidden">
+      <Card className="border-none">
         <CardHeader>
           <CardTitle className="text-2xl">Forgot Password</CardTitle>
           <CardDescription>

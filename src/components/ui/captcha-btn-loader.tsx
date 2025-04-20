@@ -12,7 +12,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 export default function CaptchaBtnLoader() {
   return (
     <div className="flex items-center justify-center gap-x-1">
-      <ClipLoader size={16} color="#444" />
+      <ClipLoader size={16} color="#fff" />
       Performing Security Check...
     </div>
   );

@@ -59,6 +59,7 @@ export async function signUp(data: SignupSchemaType): Promise<FormResponse> {
     "Too many API requests",
     false
   );
+
 */
 
   const validate = await SignupSchema.safeParseAsync(data);
@@ -132,7 +133,7 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
       3,
       "1m",
       ErrorMessages.RATE_LIMITED,
-      false
+      true
     );
 
     // Validate input data

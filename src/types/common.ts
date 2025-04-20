@@ -11,3 +11,29 @@ export const ErrorMessages: Record<keyof typeof ErrorCode, string> = {
   INTERNAL_ERROR: "Something went wrong on our side. Please try again later.",
   UNKNOWN_ERROR: "An unexpected error occurred. Please try again.",
 };
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export type BreadcrumbType = {
+  title: string;
+  url: string;
+};
+
+export type NavItemType = {
+  title: string;
+  url: string;
+  breadcrumb: BreadcrumbType[];
+};
+
+export type NavMainSectionType = {
+  title: string;
+  url: string;
+  isActive?: boolean;
+  items?: NavItemType[];
+};
+
+export type DashboardLinksType = NavMainSectionType[];
