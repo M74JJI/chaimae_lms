@@ -242,6 +242,7 @@ model VideoLecture {
   lecture     Lecture   @relation(fields: [lectureId], references: [id], onDelete: Cascade)
   lectureId   String    @unique
   videoUrl    String
+  videoName    String
   duration    Int?
   subtitles   String[]  // Array of subtitle URLs
 }

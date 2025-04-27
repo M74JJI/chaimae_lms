@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { CourseSectionType } from "../types";
 import { createId } from "@paralleldrive/cuid2";
 import { Lecture, Section } from "@prisma/client";
+import { LectureVideoUpload } from "./video-upload";
 
 interface SectionManagerProps {
   courseId: string;
@@ -49,6 +50,9 @@ interface SectionManagerProps {
 }
 
 type LectureTypeEnum = "VIDEO" | "QUIZ" | "EXERCISE";
+
+const getSectionPrefix = (order: number) => `Section ${order + 1}: `;
+const getLecturePrefix = (order: number) => `Lecture ${order + 1}: `;
 
 export const SectionManager: React.FC<SectionManagerProps> = ({
   courseId,
@@ -187,6 +191,9 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
   const [showLectureOptions, setShowLectureOptions] = useState(false);
 
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [showVideoUpload, setShowVideoUpload] = useState(false);
+
   const addLecture = (type: LectureTypeEnum) => {
     setShowLectureOptions(false);
     if (type === "QUIZ") {
@@ -261,6 +268,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
             onChange={(value) => onChange(section.id, "title", value)}
             className="text-base font-medium"
             placeholder="Section title"
+            prefix={getSectionPrefix(section.order)}
           />
         </div>
         <div className="flex items-center gap-2">
@@ -285,7 +293,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
       {isExpanded && (
         <div className="p-4 space-y-4">
           <EditableText
-            value={section.description}
+            value={section.description || ""}
             onChange={(value) => onChange(section.id, "description", value)}
             className="text-sm text-muted-foreground"
             placeholder="Section description"
@@ -308,6 +316,10 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                     setSections={setSections}
                     sectionId={section.id}
                     setDeletedLectures={setDeletedLectures}
+                    videoUrl={videoUrl}
+                    setVideoUrl={setVideoUrl}
+                    showVideoUpload={showVideoUpload}
+                    setShowVideoUpload={setShowVideoUpload}
                   />
                 ))}
               </div>
@@ -377,6 +389,7 @@ interface EditableTextProps {
   className?: string;
   placeholder?: string;
   textarea?: boolean;
+  prefix?: string;
 }
 
 const EditableText: React.FC<EditableTextProps> = ({
@@ -385,6 +398,7 @@ const EditableText: React.FC<EditableTextProps> = ({
   className,
   placeholder,
   textarea = false,
+  prefix = "",
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -426,13 +440,16 @@ const EditableText: React.FC<EditableTextProps> = ({
             rows={3}
           />
         ) : (
-          <Input
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            className={cn("flex-1 bg-background", className)}
-            placeholder={placeholder}
-            autoFocus
-          />
+          <div className="flex items-center gap-2 w-full">
+            {prefix && <span className="text-muted-foreground">{prefix}</span>}
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              className={cn("flex-1 bg-background", className)}
+              placeholder={placeholder}
+              autoFocus
+            />
+          </div>
         )}
         <Button
           variant="ghost"
@@ -457,7 +474,10 @@ const EditableText: React.FC<EditableTextProps> = ({
 
   return (
     <div className="flex items-center group w-full">
-      <div className={cn("flex-1", className)}>{value}</div>
+      <div className={cn("flex-1", className)}>
+        {prefix && <span className="text-muted-foreground">{prefix}</span>}
+        {value}
+      </div>
       <button
         className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground ml-2 transition-opacity"
         onClick={() => {
@@ -476,6 +496,10 @@ interface SortableLectureItemProps {
   setSections: React.Dispatch<React.SetStateAction<CourseSectionType[]>>;
   sectionId: string;
   setDeletedLectures: React.Dispatch<React.SetStateAction<{ id: string }[]>>;
+  videoUrl: string;
+  setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
+  showVideoUpload: boolean;
+  setShowVideoUpload: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
@@ -483,20 +507,43 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
   setSections,
   sectionId,
   setDeletedLectures,
+  setShowVideoUpload,
+  setVideoUrl,
+  showVideoUpload,
+  videoUrl,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: lecture.id });
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleChange = (field: "title" | "description", value: string) => {
+  type LectureField = "title" | "description";
+  type VideoLectureField = "videoUrl" | "videoName";
+
+  const handleChange = (
+    field: LectureField | VideoLectureField,
+    value: string
+  ) => {
     setSections((prev) =>
       prev.map((section) => {
         if (section.id !== sectionId) return section;
+
         return {
           ...section,
-          lectures: section.lectures.map((l) =>
-            l.id === lecture.id ? { ...l, [field]: value } : l
-          ),
+          lectures: section.lectures.map((l) => {
+            if (l.id !== lecture.id) return l;
+
+            if (field === "title" || field === "description") {
+              return { ...l, [field]: value };
+            }
+
+            return {
+              ...l,
+              videoLecture: {
+                ...(l.videoLecture || {}),
+                [field]: value,
+              },
+            };
+          }),
         };
       })
     );
@@ -730,6 +777,7 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
               onChange={(value) => handleChange("title", value)}
               className="flex-1 text-sm font-medium"
               placeholder="Lecture title"
+              prefix={getLecturePrefix(lecture.order)}
             />
             {getLectureTypeBadge(lecture.type)}
           </div>
@@ -763,18 +811,42 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
           />
 
           {lecture.type === "VIDEO" && (
-            <div className="border border-dashed border-border rounded-md p-6 text-center bg-secondary/20">
-              <div className="mx-auto bg-secondary p-3 rounded-full w-max">
-                <Video className="h-8 w-8 text-blue-500" />
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Upload video content
-              </p>
-              <div className="mt-4 flex gap-3 justify-center">
-                <Button variant="outline" size="sm">
-                  Select File
-                </Button>
-              </div>
+            <div className="space-y-4">
+              {showVideoUpload || videoUrl ? (
+                <LectureVideoUpload
+                  onUploadSuccess={(url, name) => {
+                    setVideoUrl(url);
+                    setShowVideoUpload(false);
+                    // You might want to save this URL to your lecture data
+                    handleChange("videoUrl", url);
+                    handleChange("videoName", name);
+                  }}
+                  onRemove={() => {
+                    setVideoUrl("");
+                    handleChange("videoUrl", "");
+                    handleChange("videoName", "");
+                  }}
+                  currentVideoUrl={videoUrl}
+                />
+              ) : (
+                <div className="border border-dashed border-border rounded-md p-6 text-center bg-secondary/20">
+                  <div className="mx-auto bg-secondary p-3 rounded-full w-max">
+                    <Video className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Upload video content
+                  </p>
+                  <div className="mt-4 flex gap-3 justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowVideoUpload(true)}
+                    >
+                      Select File
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
