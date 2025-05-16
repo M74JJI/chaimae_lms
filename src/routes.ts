@@ -6,13 +6,17 @@ export const publicApiRoutes = new Set([
   "/api/auth", // NextAuth endpoints
   "/api/metrics", // NextAuth endpoints
   "/api/examples/logging",
-  "/api/examples/metrics",
+  "/api/examples/logging",
   // Add your public API routes here
 ]) as Readonly<Set<string>>;
 
-export const publicRoutes = new Set(["/", "/error-trace"]) as Readonly<
-  Set<string>
->;
+export const publicRoutes = new Set([
+  "/",
+  "/error-trace",
+  "/course",
+  "/course/cybersecurity-soc-analyst",
+  "/cart",
+]) as Readonly<Set<string>>;
 export const authRoutes = new Set([
   "/auth/signin",
   "/auth/signup",

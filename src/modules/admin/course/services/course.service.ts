@@ -26,6 +26,7 @@ export class CourseService extends CoreService {
               userId: session?.user.id,
             },
           });
+
           if (!instr) {
             throw {
               success: false,
@@ -34,6 +35,7 @@ export class CourseService extends CoreService {
             };
           }
           const new_data = { ...data, instructorProfileId: instr?.id };
+
           const course = await db.course.upsert({
             where: { id: data.id ?? "" }, // Use nullish coalescing for clarity
             update: new_data,
@@ -107,6 +109,8 @@ export class CourseService extends CoreService {
           });
           return course;
         } catch (error: any) {
+          console.log(error);
+
           throw {
             success: false,
             code: ErrorCode.DB_ERROR,
@@ -178,54 +182,166 @@ export class CourseService extends CoreService {
             });
           }
           if (sections) {
+            console.log(sections.map((s) => s.lectures));
             await db.course.update({
               where: { id: courseId },
               data: {
                 sections: {
-                  upsert: sections.map(
-                    (section: Section & { lectures: Lecture[] }) => ({
-                      where: { id: section.id || "" }, // If no id, force empty string to avoid Prisma error
-                      update: {
-                        title: section.title,
-                        description: section.description,
-                        order: section.order,
-                        lectures: {
-                          upsert: section.lectures.map((lecture: Lecture) => ({
-                            where: { id: lecture.id || "" },
-                            update: {
-                              title: lecture.title,
-                              description: lecture.description,
-                              order: lecture.order,
-                              type: lecture.type,
-                            },
-                            create: {
-                              title: lecture.title,
-                              description: lecture.description,
-                              order: lecture.order,
-                              type: lecture.type,
-                            },
-                          })),
-                        },
-                      },
-                      create: {
-                        title: section.title,
-                        description: section.description,
-                        order: section.order,
-                        lectures: {
-                          create: section.lectures.map((lecture: Lecture) => ({
+                  upsert: sections.map((section) => ({
+                    where: { id: section.id || "none" },
+                    update: {
+                      title: section.title,
+                      description: section.description,
+                      order: section.order,
+                      lectures: {
+                        upsert: section.lectures?.map((lecture) => ({
+                          where: { id: lecture.id || "none" },
+                          update: {
                             title: lecture.title,
                             description: lecture.description,
                             order: lecture.order,
                             type: lecture.type,
-                          })),
-                        },
+                            ...(lecture.videoLecture && {
+                              videoLecture: {
+                                upsert: {
+                                  where: { lectureId: lecture.id || "none" },
+                                  update: {
+                                    videoUrl: lecture.videoLecture.videoUrl,
+                                    videoName: lecture.videoLecture.videoName,
+                                    duration: lecture.videoLecture.duration,
+                                    subtitles: lecture.videoLecture.subtitles,
+                                  },
+                                  create: {
+                                    videoUrl: lecture.videoLecture.videoUrl,
+                                    videoName: lecture.videoLecture.videoName,
+                                    duration: lecture.videoLecture.duration,
+                                    subtitles: lecture.videoLecture.subtitles,
+                                  },
+                                },
+                              },
+                            }),
+                            ...(lecture.quizLecture && {
+                              quizLecture: {
+                                upsert: {
+                                  where: { lectureId: lecture.id || "none" },
+                                  update: {
+                                    passingScore:
+                                      lecture.quizLecture.passingScore,
+                                    questions: {
+                                      deleteMany: {},
+                                      create:
+                                        lecture.quizLecture.questions?.map(
+                                          (q) => ({
+                                            question: q.question,
+                                            options: q.options,
+                                            correctIndex: q.correctIndex,
+                                            explanation: q.explanation,
+                                          })
+                                        ),
+                                    },
+                                  },
+                                  create: {
+                                    passingScore:
+                                      lecture.quizLecture.passingScore,
+                                    questions: {
+                                      create:
+                                        lecture.quizLecture.questions?.map(
+                                          (q) => ({
+                                            question: q.question,
+                                            options: q.options,
+                                            correctIndex: q.correctIndex,
+                                            explanation: q.explanation,
+                                          })
+                                        ),
+                                    },
+                                  },
+                                },
+                              },
+                            }),
+                          },
+                          create: {
+                            title: lecture.title,
+                            description: lecture.description,
+                            order: lecture.order,
+                            type: lecture.type,
+                            ...(lecture.videoLecture && {
+                              videoLecture: {
+                                create: {
+                                  videoUrl: lecture.videoLecture.videoUrl,
+                                  videoName: lecture.videoLecture.videoName,
+                                  duration: lecture.videoLecture.duration,
+                                  subtitles: lecture.videoLecture.subtitles,
+                                },
+                              },
+                            }),
+                            ...(lecture.quizLecture && {
+                              quizLecture: {
+                                create: {
+                                  passingScore:
+                                    lecture.quizLecture.passingScore,
+                                  questions: {
+                                    create: lecture.quizLecture.questions?.map(
+                                      (q) => ({
+                                        question: q.question,
+                                        options: q.options,
+                                        correctIndex: q.correctIndex,
+                                        explanation: q.explanation,
+                                      })
+                                    ),
+                                  },
+                                },
+                              },
+                            }),
+                          },
+                        })),
                       },
-                    })
-                  ),
+                    },
+                    create: {
+                      title: section.title,
+                      description: section.description,
+                      order: section.order,
+                      lectures: {
+                        create: section.lectures?.map((lecture) => ({
+                          title: lecture.title,
+                          description: lecture.description,
+                          order: lecture.order,
+                          type: lecture.type,
+                          ...(lecture.videoLecture && {
+                            videoLecture: {
+                              create: {
+                                videoUrl: lecture.videoLecture.videoUrl,
+                                videoName: lecture.videoLecture.videoName,
+                                duration: lecture.videoLecture.duration,
+                                subtitles: lecture.videoLecture.subtitles,
+                              },
+                            },
+                          }),
+                          ...(lecture.quizLecture && {
+                            quizLecture: {
+                              create: {
+                                passingScore: lecture.quizLecture.passingScore,
+                                questions: {
+                                  create: lecture.quizLecture.questions?.map(
+                                    (q) => ({
+                                      question: q.question,
+                                      options: q.options,
+                                      correctIndex: q.correctIndex,
+                                      explanation: q.explanation,
+                                    })
+                                  ),
+                                },
+                              },
+                            },
+                          }),
+                        })),
+                      },
+                    },
+                  })),
                 },
               },
             });
           }
+
           const course = await db.course.update({
             where: { id: courseId },
             data: sanitizedData, // ✅ Now it's Prisma-compatible

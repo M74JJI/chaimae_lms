@@ -32,9 +32,15 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CourseSectionType } from "../types";
+import { CourseSectionType, QuizLectureWithQuestionsType } from "../types";
 import { createId } from "@paralleldrive/cuid2";
-import { Lecture, Section } from "@prisma/client";
+import {
+  ExerciseLecture,
+  Lecture,
+  QuizLecture,
+  Section,
+  VideoLecture,
+} from "@prisma/client";
 import { LectureVideoUpload } from "./video-upload";
 
 interface SectionManagerProps {
@@ -196,51 +202,74 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
 
   const addLecture = (type: LectureTypeEnum) => {
     setShowLectureOptions(false);
-    if (type === "QUIZ") {
-      setSections((prev) =>
-        prev.map((s) => {
-          if (s.id !== section.id) return s;
-          return {
-            ...s,
-            lectures: [
-              ...s.lectures,
-              {
-                id: createId(),
-                title: "",
-                description: "",
-                order: s.lectures.length,
-                type,
-                quizLecture: {
-                  id: createId(),
-                  title: "",
-                  description: "",
-                  questions: [],
+
+    setSections((prev) =>
+      prev.map((s) => {
+        if (s.id !== section.id) return s;
+
+        const baseLecture = {
+          id: createId(),
+          title: "",
+          description: "",
+          order: s.lectures.length,
+          type,
+        };
+
+        switch (type) {
+          case "QUIZ":
+            return {
+              ...s,
+              lectures: [
+                ...s.lectures,
+                {
+                  ...baseLecture,
+                  quizLecture: {
+                    id: createId(),
+                    questions: [],
+                  },
                 },
-              },
-            ],
-          };
-        })
-      );
-    } else {
-      setSections((prev) =>
-        prev.map((s) => {
-          if (s.id !== section.id) return s;
-          return {
-            ...s,
-            lectures: [
-              ...s.lectures,
-              {
-                id: createId(),
-                title: type === "VIDEO" ? "" : "",
-                description: "",
-                order: s.lectures.length,
-                type,
-              },
-            ],
-          };
-        })
-      );
-    }
+              ],
+            };
+
+          case "VIDEO":
+            return {
+              ...s,
+              lectures: [
+                ...s.lectures,
+                {
+                  ...baseLecture,
+                  videoLecture: {
+                    id: createId(),
+                    videoUrl: "",
+                    videoName: "",
+                    duration: 0,
+                    subtitles: [],
+                  },
+                },
+              ],
+            };
+
+          case "EXERCISE":
+            return {
+              ...s,
+              lectures: [
+                ...s.lectures,
+                {
+                  ...baseLecture,
+                  exerciseLecture: {
+                    id: createId(),
+                    content: "",
+                    solution: "",
+                  },
+                },
+              ],
+            };
+
+          default:
+            return s;
+        }
+      })
+    );
   };
 
   const handleDeleteSection = (sectionId: string) => {
@@ -316,8 +345,6 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                     setSections={setSections}
                     sectionId={section.id}
                     setDeletedLectures={setDeletedLectures}
-                    videoUrl={videoUrl}
-                    setVideoUrl={setVideoUrl}
                     showVideoUpload={showVideoUpload}
                     setShowVideoUpload={setShowVideoUpload}
                   />
@@ -492,12 +519,14 @@ const EditableText: React.FC<EditableTextProps> = ({
 };
 
 interface SortableLectureItemProps {
-  lecture: Lecture;
+  lecture: Lecture & {
+    videoLecture?: VideoLecture | null;
+    quizLecture?: QuizLectureWithQuestionsType | null;
+    exerciseLecture?: ExerciseLecture | null;
+  };
   setSections: React.Dispatch<React.SetStateAction<CourseSectionType[]>>;
   sectionId: string;
   setDeletedLectures: React.Dispatch<React.SetStateAction<{ id: string }[]>>;
-  videoUrl: string;
-  setVideoUrl: React.Dispatch<React.SetStateAction<string>>;
   showVideoUpload: boolean;
   setShowVideoUpload: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -508,9 +537,7 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
   sectionId,
   setDeletedLectures,
   setShowVideoUpload,
-  setVideoUrl,
   showVideoUpload,
-  videoUrl,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: lecture.id });
@@ -518,6 +545,9 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
 
   type LectureField = "title" | "description";
   type VideoLectureField = "videoUrl" | "videoName";
+  const [videoUrl, setVideoUrl] = useState<string>(
+    lecture.videoLecture?.videoUrl || ""
+  );
 
   const handleChange = (
     field: LectureField | VideoLectureField,
@@ -535,14 +565,23 @@ const SortableLectureItem: React.FC<SortableLectureItemProps> = ({
             if (field === "title" || field === "description") {
               return { ...l, [field]: value };
             }
+            // Handle video lecture fields
+            if (field === "videoUrl" || field === "videoName") {
+              return {
+                ...l,
+                videoLecture: {
+                  ...(l.videoLecture || {
+                    id: createId(),
+                    lectureId: l.id,
+                    duration: 0,
+                    subtitles: [],
+                  }),
+                  [field]: value,
+                },
+              };
+            }
 
-            return {
-              ...l,
-              videoLecture: {
-                ...(l.videoLecture || {}),
-                [field]: value,
-              },
-            };
+            return l;
           }),
         };
       })

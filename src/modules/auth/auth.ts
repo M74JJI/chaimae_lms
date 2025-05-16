@@ -50,6 +50,7 @@ export const nextAuth = NextAuth({
       if (session.user) {
         if (token.firstName) session.user.firstName = token.firstName;
         if (token.lastName) session.user.lastName = token.lastName;
+        if (token.sub) session.user.id = token.sub;
       }
 
       return session;

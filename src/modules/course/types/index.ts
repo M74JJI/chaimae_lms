@@ -1,0 +1,20 @@
+type CourseType = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  thumbnail: string;
+  category: string;
+  subcategory?: string;
+  difficultyLevel: string;
+  duration: number;
+  language: string;
+  numLectures: number;
+  rating: number;
+  numReviews: number;
+  instructor_name: string;
+  instructor_image: string;
+  price: number;
+  slug: string;
+  numSections: number;
+};

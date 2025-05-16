@@ -2,6 +2,7 @@ import {
   DifficultyLevel,
   ExerciseLecture,
   Prisma,
+  Question,
   QuizLecture,
   Section,
   VideoLecture,
@@ -39,6 +40,8 @@ export type CourseTabsStatus = {
   prerequisites: boolean;
   curriculum: boolean;
   landing: boolean;
+  pricing: boolean;
+  messages: boolean;
 };
 
 export type CourseLandingType = {
@@ -67,9 +70,17 @@ export type CourseSectionType = Prisma.SectionGetPayload<{
     lectures: {
       include: {
         exerciseLecture: true;
-        quizLecture: true;
+        quizLecture: {
+          include: {
+            questions: true;
+          };
+        };
         videoLecture: true;
       };
     };
   };
 }>;
+
+export type QuizLectureWithQuestionsType = QuizLecture & {
+  questions: Question[];
+};

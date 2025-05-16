@@ -13,9 +13,7 @@ import { Button } from "@/components/ui/button";
 // Queries
 
 // Utils
-import { createId } from "@paralleldrive/cuid2";
 
-import { CourseSchemaType } from "../../schemas/course.schema";
 import { updateCourseAction } from "../../actions/course.actions";
 import { useRouter } from "next/navigation";
 import ClickToAddInputs from "@/components/dashboard/shared/click-to-add";
@@ -79,9 +77,9 @@ const CoursePrerequisitesForm: FC<PrerequisitesProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pl-3">
       <div>
-        <div className="mx-auto px-4 sm:container">
+        <div>
           <div className="border-stroke dark:border-dark-3 border-b">
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
               Prerequisites

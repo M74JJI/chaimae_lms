@@ -82,7 +82,7 @@ const CourseLandingForm: FC<LandingProps> = ({
   return (
     <div className="space-y-4 pl-3">
       <div>
-        <div className="mx-auto sm:container">
+        <div>
           <div className="border-stroke dark:border-dark-3 border-b">
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
               Course landing page

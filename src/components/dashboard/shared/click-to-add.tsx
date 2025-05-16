@@ -82,7 +82,7 @@ const ClickToAddInputs: React.FC<ClickToAddInputsProps> = ({
         items={items.map((_, index) => `item-${index}`)}
         strategy={verticalListSortingStrategy}
       >
-        <div className={cn("flex flex-col gap-y-4 px-4")}>
+        <div className={cn("flex flex-col gap-y-4 ")}>
           {items.map((value, index) => (
             <SortableInputItem
               key={`item-${index}`}

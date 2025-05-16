@@ -5,6 +5,7 @@ import { CategoryService } from "../services/category.service";
 import { Category } from "@prisma/client";
 import { ApiResponse } from "@/types/common";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { db } from "@/lib/db";
 
 // Create upsertCategory action
 export async function upsertCategoryAction(
@@ -87,3 +88,16 @@ export async function getCategoryByIdAction(id: string) {
     return error;
   }
 }
+
+export const getAllCategories = async () => {
+  // Retrieve all categories from the database
+  const categories = await db.category.findMany({
+    include: {
+      subcategories: true,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+  return categories;
+};

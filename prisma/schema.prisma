@@ -30,7 +30,10 @@ model User {
   sessions Session[] @relation("UserSessions")
   instructorProfile InstructorProfile? @relation("UserInstructorProfile")
   ownedCourses  UserCourse[]    @relation("UserCourses")
-
+  cart          Cart?             @relation("UserCart")
+  payments PaymentDetails[]  @relation("PaymentDetailsToUser")
+  orders            Order[]           @relation("UserOrders")
+  reviews           Review[]          @relation("ReviewToUser")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -162,13 +165,16 @@ model Course {
   thumbnail       String?
   promotionalVideo String?
   status          CourseStatus   @default(DRAFT)
-  difficultyLevel DifficultyLevel? @default(BEGINNER)
+  difficultyLevel DifficultyLevel @default(BEGINNER)
   intendedLearners String[]  
   prerequisites   String[]  
   objectives      String[]  
-  duration        Float?          
+  duration        Float          @default(0)
   welcomeMessage  String?
   congratulationsMessage String?
+  rating            Float             @default(0)
+  numReviews        Int               @default(0)
+  numLectures        Int               @default(0)
 
   instructorProfile InstructorProfile @relation("InstructorCourses", fields: [instructorProfileId], references: [id])
   instructorProfileId String
@@ -185,6 +191,9 @@ model Course {
   sections        Section[] @relation("CourseSections")
 
   users           UserCourse[] @relation("UserCourses")
+  cartItems       CartItem[] @relation("CourseToCartItem")
+  reviews   Review[]         @relation("ReviewToCourse")
+
   
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -244,7 +253,11 @@ model VideoLecture {
   videoUrl    String
   videoName    String
   duration    Int?
+  
   subtitles   String[]  // Array of subtitle URLs
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model QuizLecture {
@@ -253,6 +266,9 @@ model QuizLecture {
   lectureId   String    @unique
   questions   Question[] // Array of structured questions
   passingScore Int?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 model Question {
   id           String    @id @default(cuid())
@@ -272,6 +288,9 @@ model ExerciseLecture {
   lectureId   String    @unique
   instructions String
   solution    String?   // Optional solution or answer key
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 enum CourseStatus {
   DRAFT
@@ -296,4 +315,131 @@ model Language {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+
+model Cart {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation("UserCart", fields: [userId], references: [id], onDelete: Cascade)
+
+  cartItems    CartItem[] @relation("CartToCartItem")
+  total        Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+
+model CartItem {
+  id          String @id @default(uuid())
+
+  courseId   String
+  course   Course   @relation("CourseToCartItem", fields: [courseId], references: [id], onDelete: Cascade)
+
+
+  cartId String
+  cart   Cart   @relation("CartToCartItem", fields: [cartId], references: [id], onDelete: Cascade)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  Failed
+  Declined
+  Cancelled
+  Refunded
+  PartiallyRefunded
+  Chargeback
+}
+
+enum PaymentMethod {
+  Paypal
+  Stripe
+}
+
+model Order {
+  id           String @id @default(uuid())
+  total        Float
+
+  paymentStatus PaymentStatus @default(Pending)
+  items OrderItem[] @relation("OrderItemToOrder")
+
+  paymentMethod  PaymentMethod?
+  paymentDetails PaymentDetails? @relation("PaymentDetailsToOrder")
+
+  userId String
+  user   User   @relation("UserOrders", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+
+  courseId String
+
+  courseSlug String
+  title        String
+  thumbnail        String
+  price       Float
+
+  orderId String
+  order   Order @relation("OrderItemToOrder", fields: [orderId], references: [id], onDelete: Cascade)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model PaymentDetails {
+  
+  id String @id @default(uuid())
+
+  paymentInetntId String
+  paymentMethod String
+  status String
+  amount Float
+  currency String
+
+  orderId String @unique
+  order Order @relation("PaymentDetailsToOrder",fields: [orderId],references: [id],onDelete: Cascade) 
+
+  userId String
+  user User @relation("PaymentDetailsToUser",fields: [userId],references: [id],onDelete: Cascade)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+}
+
+model Review {
+  id       String @id @default(uuid())
+  review   String
+  rating   Float
+
+  userId String
+  user   User   @relation("ReviewToUser", fields: [userId], references: [id])
+
+  courseId String
+  course   Course @relation("ReviewToCourse", fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId])
 }

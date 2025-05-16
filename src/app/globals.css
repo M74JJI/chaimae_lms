@@ -129,3 +129,48 @@
     @apply hover:bg-[#73c2fb];
   }
 }
+
+/* Order Grid  */
+.order-area-3 {
+  display: grid;
+  grid-template-areas:
+    "cards"
+    "courses"
+    "payment";
+}
+
+@media (min-width: 768px) {
+  .order-area-3 {
+    grid-template-areas:
+      "courses cards"
+      "courses payment";
+  }
+}
+@media (min-width: 1024px) {
+  .order-area-3 {
+    grid-template-areas: "cards courses payment";
+  }
+}
+@media (min-width: 1700px) {
+  .swiper1700width {
+    width: 35vw !important;
+  }
+}
+
+.order-area-2 {
+  display: grid;
+  grid-template-areas: "cards courses";
+}
+
+.order-area-cards {
+  grid-area: cards;
+}
+.order-area-courses {
+  grid-area: courses;
+}
+.order-area-payment {
+  grid-area: payment;
+}
+body {
+  /*background: #faf9f6;*/
+}

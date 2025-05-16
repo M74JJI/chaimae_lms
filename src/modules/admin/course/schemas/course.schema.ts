@@ -41,6 +41,45 @@ export const CourseCategorySchema = z.object({
     .cuid2(),
 });
 
+const VideoLectureSchema = z.object({
+  videoUrl: z.string(),
+  videoName: z.string(),
+  duration: z.number().optional(),
+  subtitles: z.array(z.string()).optional(),
+});
+
+export const QuestionSchema = z.object({
+  id: z.string().optional(),
+  question: z.string().min(1),
+  options: z.array(z.string()).min(2), // At least 2 options
+  correctIndex: z.number().nonnegative(),
+  explanation: z.string().optional(),
+});
+
+export const QuizLectureSchema = z.object({
+  id: z.string().optional(),
+  passingScore: z.number().int().min(0).max(100).nullable().optional(),
+  questions: z.array(QuestionSchema).optional(),
+});
+
+const LectureSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  description: z.string().optional(),
+  order: z.number(),
+  type: z.enum(["VIDEO", "QUIZ", "EXERCISE"]), // Adjust based on your LectureType enum
+  videoLecture: VideoLectureSchema.optional(),
+  quizLecture: QuizLectureSchema.optional(),
+});
+
+const SectionSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  description: z.string().optional(),
+  order: z.number(),
+  lectures: z.array(LectureSchema).optional(),
+});
+
 export const CourseSchema = z.object({
   title: z
     .string()
@@ -92,9 +131,11 @@ export const CourseSchema = z.object({
     })
     .cuid2()
     .optional(),
-  sections: z.any().optional(),
+  sections: z.array(SectionSchema).optional(),
   deletedSections: z.object({ id: z.string() }).array().optional(),
   deletedLectures: z.object({ id: z.string() }).array().optional(),
+  welcomeMessage: z.string().optional(),
+  congratulationsMessage: z.string().optional(),
 });
 
 export const CourseIntendedLearnersSchema = z.object({

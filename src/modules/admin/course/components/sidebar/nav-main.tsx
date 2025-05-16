@@ -112,7 +112,15 @@ export function NavMain({
                                     (subItem.url === "/manage/objectives" &&
                                       course_statuses.objectives) ||
                                     (subItem.url === "/manage/prerequisites" &&
-                                      course_statuses.prerequisites) ? (
+                                      course_statuses.prerequisites) ||
+                                    (subItem.url === "/manage/landing" &&
+                                      course_statuses.landing) ||
+                                    (subItem.url === "/manage/curriculum" &&
+                                      course_statuses.curriculum) ||
+                                    (subItem.url === "/manage/pricing" &&
+                                      course_statuses.pricing) ||
+                                    (subItem.url === "/manage/messages" &&
+                                      course_statuses.messages) ? (
                                       <span className="bg-orange-background w-4 h-4 rounded-full flex items-center justify-center">
                                         <Check className="w-3 text-black dark:text-white" />
                                       </span>

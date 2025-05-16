@@ -22,7 +22,11 @@ export default async function ManageCurriculumCourse({
       lectures: {
         include: {
           exerciseLecture: true,
-          quizLecture: true,
+          quizLecture: {
+            include: {
+              questions: true,
+            },
+          },
           videoLecture: true,
         },
       },

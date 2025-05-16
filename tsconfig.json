@@ -22,7 +22,9 @@
       "@/*": ["./src/*"],
       "@/public/*": ["./public/*"],
       "@/auth/*": ["./src/modules/auth/*"],
-      "@/admin/*": ["./src/modules/admin/*"]
+      "@/admin/*": ["./src/modules/admin/*"],
+      "@/payment/*": ["./src/modules/payment/*"],
+      "@/order/*": ["./src/modules/order/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

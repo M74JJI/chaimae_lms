@@ -18,10 +18,8 @@ import { createId } from "@paralleldrive/cuid2";
 import { CourseSchemaType } from "../../schemas/course.schema";
 import { updateCourseAction } from "../../actions/course.actions";
 import { useRouter } from "next/navigation";
-import ClickToAddInputs from "@/components/dashboard/shared/click-to-add";
 import { CourseSectionType } from "../../types";
 import { SectionManager } from "../curriculum-manager";
-import { Lecture, Section } from "@prisma/client";
 
 interface ObjectivesProps {
   courseId: string;
@@ -36,13 +34,56 @@ const CourseCurriculumForm: FC<ObjectivesProps> = ({ data, courseId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  function mapSectionsToInput(sections: CourseSectionType[]) {
+    return sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      description: section.description ?? undefined,
+      order: section.order,
+      lectures: section.lectures?.map((lecture) => ({
+        id: lecture.id,
+        title: lecture.title,
+        description: lecture.description ?? undefined,
+        order: lecture.order,
+        type: lecture.type,
+        videoLecture: lecture.videoLecture
+          ? {
+              videoUrl: lecture.videoLecture.videoUrl,
+              videoName: lecture.videoLecture.videoName,
+              duration: lecture.videoLecture.duration ?? undefined,
+              subtitles: lecture.videoLecture.subtitles ?? undefined,
+            }
+          : undefined,
+        quizLecture: lecture.quizLecture
+          ? {
+              passingScore: lecture.quizLecture.passingScore ?? undefined,
+              questions:
+                lecture.quizLecture.questions?.map((q) => ({
+                  id: q.id,
+                  question: q.question,
+                  options: q.options,
+                  correctIndex: q.correctIndex,
+                  explanation: q.explanation ?? undefined,
+                })) ?? [],
+            }
+          : undefined,
+        exerciseLecture: lecture.exerciseLecture
+          ? {
+              instructions: lecture.exerciseLecture.instructions,
+              solution: lecture.exerciseLecture.solution ?? undefined,
+            }
+          : undefined,
+      })),
+    }));
+  }
+
   const handleSave = async () => {
     try {
       setLoading(true);
       setError("");
 
       const response = await updateCourseAction(courseId, {
-        sections,
+        sections: mapSectionsToInput(sections),
         deletedLectures,
         deletedSections,
       });
@@ -60,12 +101,10 @@ const CourseCurriculumForm: FC<ObjectivesProps> = ({ data, courseId }) => {
     }
   };
 
-  console.log("------->", sections);
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pl-3">
       <div>
-        <div className="mx-auto px-4 sm:container">
+        <div>
           <div className="border-stroke dark:border-dark-3 border-b">
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
               Curriculum

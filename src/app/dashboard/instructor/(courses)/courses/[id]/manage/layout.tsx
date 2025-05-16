@@ -56,15 +56,23 @@ export default async function CourseManageLayout({
     prerequisites: prerequisites.length > 2,
     curriculum: courseData?._count.sections > 0,
     landing:
-      difficultyLevel && categoryId && subcategoryId && languageId && price
-        ? price >= 0
-        : false &&
-          intendedLearners.length > 0 &&
-          subtitle &&
-          thumbnail &&
-          title &&
-          promotionalVideo &&
-          description,
+      difficultyLevel &&
+      categoryId &&
+      subcategoryId &&
+      languageId &&
+      intendedLearners.length > 0 &&
+      subtitle &&
+      thumbnail &&
+      title &&
+      promotionalVideo &&
+      description
+        ? true
+        : false,
+    pricing: courseData.price && courseData.price > 0 ? true : false,
+    messages:
+      courseData.welcomeMessage && courseData.congratulationsMessage
+        ? true
+        : false,
   };
   return (
     <SidebarProvider className="flex flex-col h-[100vh]">
