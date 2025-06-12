@@ -1,5 +1,4 @@
 import { z, ZodSchema } from "zod";
-import { CaptchaActionOptions, CaptchaOptions } from "./captcha";
 import { ErrorCodeType } from "./errors";
 
 export type FormResponse<T = unknown> = {
@@ -21,11 +20,7 @@ export type FormMessage = {
 export type FormHandlerParams<T extends ZodSchema, D = unknown> = {
   schema: T;
   defaultValues: z.infer<T>;
-  onSubmit: (
-    data: z.infer<T>,
-    captchaOptions: CaptchaActionOptions
-  ) => Promise<FormResponse<D>>;
+  onSubmit: (data: z.infer<T>) => Promise<FormResponse<D>>;
   onSuccess?: (data?: D) => void;
   onError?: (error: FormResponse<unknown>) => void;
-  captcha?: CaptchaOptions;
 };

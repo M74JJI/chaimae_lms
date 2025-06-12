@@ -1,14 +1,9 @@
 import { RateLimitError } from "@/lib/errors"; // Import RateLimitError
 import { ErrorCode } from "@/types"; // Your custom error codes and messages
 import { ErrorMessages } from "@/types/common";
-import logger from "@/lib/logger";
 
 // Centralized Error Handler
 export const handleServiceError = (error: any, requestId: string) => {
-  logger.error("Unexpected error during sign-in process", {
-    meta: { requestId },
-    error: error.message,
-  });
   // If the error is a RateLimitError, return a formatted response
   if (error instanceof RateLimitError) {
     return {

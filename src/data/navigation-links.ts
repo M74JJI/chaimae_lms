@@ -58,20 +58,6 @@ export const admin_dashboard_links = [
         ],
       },
       {
-        title: "➕  Create Course",
-        url: "/",
-        breadcrumb: [
-          {
-            title: "📚 Courses",
-            url: "/",
-          },
-          {
-            title: "➕ Create Course",
-            url: "/",
-          },
-        ],
-      },
-      {
         title: "🗂️  Categories",
         url: "/dashboard/admin/categories",
 
@@ -88,7 +74,7 @@ export const admin_dashboard_links = [
       },
       {
         title: "🗃️  Subcategories",
-        url: "/",
+        url: "/dashboard/admin/subcategories",
         breadcrumb: [
           {
             title: "📚 Courses",
@@ -101,29 +87,15 @@ export const admin_dashboard_links = [
         ],
       },
       {
-        title: "❓  Quizzes",
-        url: "/",
+        title: "📝 Review Courses",
+        url: "/dashboard/admin/courses/review",
         breadcrumb: [
           {
             title: "📚 Courses",
             url: "/",
           },
           {
-            title: "❓ Quizzes",
-            url: "/",
-          },
-        ],
-      },
-      {
-        title: "🎖️  Certificates",
-        url: "/",
-        breadcrumb: [
-          {
-            title: "📚 Courses",
-            url: "/",
-          },
-          {
-            title: "🎖️ Certificates",
+            title: "📝 Review Submitted Courses",
             url: "/",
           },
         ],
@@ -142,7 +114,7 @@ export const admin_dashboard_links = [
     items: [
       {
         title: "🧑‍🎓  Students",
-        url: "/",
+        url: "/dashboard/admin/students",
         breadcrumb: [
           {
             title: "👨‍🏫 Instructors / Users",
@@ -156,7 +128,7 @@ export const admin_dashboard_links = [
       },
       {
         title: "👨‍🏫  Instructors",
-        url: "/",
+        url: "/dashboard/admin/instructors",
         breadcrumb: [
           {
             title: "👨‍🏫 Instructors / Users",
@@ -170,7 +142,7 @@ export const admin_dashboard_links = [
       },
       {
         title: "📋  Enrollments",
-        url: "/",
+        url: "/dashboard/admin/enrollments",
         breadcrumb: [
           {
             title: "👨‍🏫 Instructors / Users",
@@ -182,22 +154,9 @@ export const admin_dashboard_links = [
           },
         ],
       },
-      {
-        title: "💬  Feedback",
-        url: "/",
-        breadcrumb: [
-          {
-            title: "👨‍🏫 Instructors / Users",
-            url: "/",
-          },
-          {
-            title: "💬 Feedback",
-            url: "/",
-          },
-        ],
-      },
     ],
   },
+  /*
   {
     title: "🛒 Sales & Subscriptions",
     url: "/",
@@ -266,6 +225,7 @@ export const admin_dashboard_links = [
       },
     ],
   },
+ */
 ];
 export const instructor_dashboard_links = [
   {
@@ -281,7 +241,7 @@ export const instructor_dashboard_links = [
     items: [
       {
         title: "📖  All Courses",
-        url: "/dashboard/instructor/courses",
+        url: "/dashboard/instructor/courses/all",
         breadcrumb: [
           {
             title: "📚 Courses",
@@ -289,7 +249,7 @@ export const instructor_dashboard_links = [
           },
           {
             title: "📖 All Courses",
-            url: "/dashboard/instructor/courses",
+            url: "/dashboard/instructor/courses/all",
           },
         ],
       },

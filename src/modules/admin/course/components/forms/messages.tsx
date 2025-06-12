@@ -64,10 +64,10 @@ const CourseMessagesForm: FC<LandingProps> = ({ courseId, data }) => {
         <div>
           <div className="border-stroke dark:border-dark-3 border-b">
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
-              Course Pricing
+              Course Messages
             </h2>
             <p className="text-body-color dark:text-dark-6 mb-6 text-sm font-medium">
-              Choose a price for your course
+              Add welcome and congratulations messages for your students
             </p>
           </div>
         </div>

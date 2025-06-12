@@ -10,6 +10,7 @@ import {
 import { CourseService } from "../services/course.service";
 import slugify from "slugify";
 import { ApiResponse } from "@/types/common";
+import { db } from "@/lib/db";
 // Create upsertCourseAction action
 export async function upsertCourseAction(data: Course): Promise<FormResponse> {
   // Validate incoming data with Zod
@@ -30,14 +31,11 @@ export async function upsertCourseAction(data: Course): Promise<FormResponse> {
 
     // Check for slug uniqueness
     while (await CourseService.slugExists(uniqueSlug)) {
-      console.log("------------------");
       uniqueSlug = `${baseSlug}-${counter++}`;
     }
     data.slug = uniqueSlug;
 
-    const result = await CourseService.upsertCourse(data, {
-      name: "CourseService.upsertCourse",
-    });
+    const result = await CourseService.upsertCourse(data);
 
     return {
       success: true,
@@ -65,9 +63,7 @@ export async function createCourseAction(
   }
 
   try {
-    const result = await CourseService.createCourse(data, {
-      name: "CourseService.upsertCourse",
-    });
+    const result = await CourseService.createCourse(data);
 
     return {
       success: true,
@@ -97,9 +93,7 @@ export async function updateCourseAction(
   }
 
   try {
-    const result = await CourseService.updateCourse(courseId, data, {
-      name: "CourseService.updateCourseProperties",
-    });
+    const result = await CourseService.updateCourse(courseId, data);
 
     return {
       success: true,
@@ -114,3 +108,72 @@ export async function updateCourseAction(
     };
   }
 }
+
+export const getAllCoursesForAdminAction = async () => {
+  // Retrieve all courses from the database
+  const courses = await db.course.findMany({
+    include: {
+      category: true,
+      subcategory: true,
+      _count: {
+        select: {
+          sections: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+  return courses;
+};
+
+export async function deletecourseAction(id: string) {
+  try {
+    const result = await db.course.delete({
+      where: { id },
+    });
+    return result;
+  } catch (error) {
+    return error;
+  }
+}
+
+export const getAllSubmittedCoursesAction = async () => {
+  // Retrieve all submitted courses from the database
+  const courses = await db.course.findMany({
+    where: {
+      status: "SUBMITTED",
+    },
+    include: {
+      category: true,
+      subcategory: true,
+      language: true,
+      instructorProfile: {
+        include: {
+          user: true,
+        },
+      },
+      sections: {
+        include: {
+          lectures: {
+            include: {
+              exerciseLecture: true,
+              quizLecture: true,
+              videoLecture: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          sections: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+  return courses;
+};

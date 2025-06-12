@@ -7,7 +7,6 @@ import { type z, type ZodSchema } from "zod";
 
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-import { RateLimitError } from "@/lib/errors";
 import {
   type FormResponse,
   type FormHandlerParams,
@@ -23,8 +22,6 @@ import {
 export const useFormHandler = <T extends ZodSchema, D = unknown>(
   params: FormHandlerParams<T, D>
 ) => {
-  const captcha = params.captcha;
-
   // Initialize form with schema-based validation
   const form = useForm<z.infer<T>>({
     resolver: zodResolver(params.schema),
@@ -44,59 +41,6 @@ export const useFormHandler = <T extends ZodSchema, D = unknown>(
   const [captchaState, setCaptchaState] = useState(initialCaptchaState);
 
   /**
-   * Executes reCAPTCHA if enabled, and returns a valid token.
-   */
-  const refreshCaptcha = async (): Promise<string | undefined | null> => {
-    if (captcha?.enableCaptcha && captcha.executeRecaptcha) {
-      setCaptchaState((prev) => ({ ...prev, validating: true }));
-      try {
-        const token = await captcha.executeRecaptcha(
-          captcha.action || "default_action"
-        );
-        if (!token) {
-          setMessage({ message: "Error Getting Captcha", type: "error" });
-          return null;
-        }
-        setCaptchaState({
-          token,
-          tokenTimestamp: Date.now(),
-          validating: false,
-        });
-        return token;
-      } catch (error) {
-        console.error("Error refreshing CAPTCHA:", error);
-        setMessage({ message: "Captcha verification failed", type: "error" });
-        setCaptchaState((prev) => ({ ...prev, validating: false }));
-        return null;
-      }
-    }
-    return null;
-  };
-
-  /**
-   * Checks whether the current captcha token is expired or invalid.
-   */
-  const isCaptchaInvalid = (): boolean => {
-    const now = Date.now();
-    const invalid =
-      !captchaState.token ||
-      now - captchaState.tokenTimestamp > (captcha?.tokenExpiryMs || 120000);
-    if (invalid) {
-      setCaptchaState(initialCaptchaState);
-    }
-    return invalid;
-  };
-
-  /**
-   * Automatically refresh CAPTCHA token when it's invalid.
-   */
-  useEffect(() => {
-    if (captcha?.enableCaptcha && isCaptchaInvalid()) {
-      refreshCaptcha();
-    }
-  }, [captchaState.token, captcha?.tokenExpiryMs, captcha?.enableCaptcha]);
-
-  /**
    * Handles form submission logic, including:
    * - Captcha validation
    * - Success/redirect flow
@@ -108,26 +52,9 @@ export const useFormHandler = <T extends ZodSchema, D = unknown>(
 
     let captchaToken: string | undefined | null = captchaState.token;
 
-    if (captcha?.enableCaptcha) {
-      if (!captcha.executeRecaptcha) {
-        setMessage({ type: "error", message: "Captcha not available" });
-        return;
-      }
-
-      if (isCaptchaInvalid()) {
-        console.log("Token expired, refreshing CAPTCHA");
-        captchaToken = await refreshCaptcha();
-        if (!captchaToken) return;
-      }
-    }
-
     startTransition(async () => {
       try {
-        const response = await params.onSubmit(data, {
-          token: captchaToken || "",
-          tokenExpiryMs: captcha?.tokenExpiryMs || 120000,
-          action: captcha?.action,
-        });
+        const response = await params.onSubmit(data);
 
         if (response.success) {
           setMessage({ type: "success", message: response.message });
@@ -177,10 +104,7 @@ export const useFormHandler = <T extends ZodSchema, D = unknown>(
         }
       } catch (error) {
         if (isRedirectError(error)) throw error;
-
-        if (error instanceof RateLimitError) {
-          setMessage({ type: "error", message: error.message });
-        } else {
+        else {
           const fallbackError = parseUnknownError(error);
           setMessage({ type: "error", message: fallbackError.message });
           params.onError?.(fallbackError);

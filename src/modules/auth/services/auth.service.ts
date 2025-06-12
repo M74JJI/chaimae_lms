@@ -34,34 +34,10 @@ import {
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { UserService } from "./userr.servicee";
 import bcrypt from "bcryptjs";
-import {
-  getDeviceFingerprint,
-  getFullFingerprint,
-  getGeoFingerprint,
-  getIPFingerprint,
-  getPrivateFingerprint,
-} from "@/lib/client-fingerprint";
-import { SpanStatusCode, trace } from "@opentelemetry/api";
+
 import { ErrorMessages } from "@/types/common";
-import { RateLimiter } from "@/lib/rate-limiter";
-import { startSpan } from "@/lib/tracing";
-import logger from "@/lib/logger";
-import { RateLimitError } from "@/lib/errors";
-import { handleServiceError } from "@/lib/error-handler";
+
 export async function signUp(data: SignupSchemaType): Promise<FormResponse> {
-  const fingerprint = await getFullFingerprint();
-
-  /*
-  await RateLimiter.check(
-    fingerprint,
-    60,
-    "1m",
-    "Too many API requests",
-    false
-  );
-
-*/
-
   const validate = await SignupSchema.safeParseAsync(data);
   if (!validate.success) {
     return {
@@ -73,9 +49,7 @@ export async function signUp(data: SignupSchemaType): Promise<FormResponse> {
   const { email, password, firstName, lastName, phoneNumber } = validate.data;
 
   try {
-    const userExists = await UserService.getUserByEmail(email, {
-      name: "aaaaaa",
-    });
+    const userExists = await UserService.getUserByEmail(email);
     if (userExists) {
       return { message: "User already exists", success: false };
     }
@@ -112,37 +86,10 @@ export async function signUp(data: SignupSchemaType): Promise<FormResponse> {
 }
 
 export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
-  // Generate a unique request ID for this specific sign-in attempt
-  const requestId = crypto.randomUUID();
-
-  // Start a trace span for the sign-in process
-  const span = startSpan("auth_signin", {
-    "operation.id": requestId,
-    "operation.type": "signin",
-  });
-
   try {
-    // Log the start of the sign-in process
-    logger.info("Sign-in attempt started", {
-      meta: { requestId, email: data.email },
-    });
-
-    // Rate limit check
-    await RateLimiter.check(
-      data.email,
-      3,
-      "1m",
-      ErrorMessages.RATE_LIMITED,
-      true
-    );
-
     // Validate input data
     const validate = await SignInSchema.safeParseAsync(data);
     if (!validate.success) {
-      logger.warn("Invalid sign-in data", {
-        meta: { requestId, errors: validate.error.errors },
-      });
-
       return {
         success: false,
         code: ErrorCode.VALIDATION_ERROR,
@@ -152,29 +99,9 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
 
     const { email, password } = validate.data;
 
-    // Trace user retrieval
-    const userSpan = startSpan("auth_signin_getUserByEmail", {
-      email: email,
-      "request.id": requestId,
-    });
-
-    const user = await UserService.getUserByEmail(email, {
-      name: "auth_signin_getUserByEmail",
-    });
-    userSpan.end(); // End the span for user retrieval
+    const user = await UserService.getUserByEmail(email);
 
     if (!user?.email || !user.password) {
-      const userNotFoundSpan = startSpan("auth_signin_user_not_found", {
-        email: email,
-        "request.id": requestId,
-      });
-
-      logger.warn("User not found or password missing", {
-        meta: { requestId, email },
-      });
-
-      userNotFoundSpan.end(); // End the span for user not found
-
       return {
         success: false,
         code: ErrorCode.AUTH_ERROR,
@@ -185,17 +112,6 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
     // Validate password
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
-      const invalidPasswordSpan = startSpan("auth_signin_invalid_password", {
-        email: email,
-        "request.id": requestId,
-      });
-
-      logger.warn("Invalid password", {
-        meta: { requestId, email },
-      });
-
-      invalidPasswordSpan.end(); // End the span for invalid password
-
       return {
         success: false,
         code: ErrorCode.AUTH_ERROR,
@@ -208,10 +124,6 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
       try {
         const token = await createVerificationTokenHandler(email);
         if (!token) {
-          logger.error("Token creation failed", {
-            meta: { requestId, email },
-          });
-
           return {
             success: false,
             code: ErrorCode.INTERNAL_ERROR,
@@ -220,18 +132,8 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
         }
         await sendEmailVerification(email, token.token);
 
-        // Log that a verification email was sent
-        logger.info("Confirmation email sent", {
-          meta: { requestId, email },
-        });
-
         return { success: true, message: "Confirmation Email Sent" };
       } catch (error: any) {
-        logger.error("Error sending verification email", {
-          meta: { requestId, email },
-          error: error.message,
-        });
-
         return {
           success: false,
           code: ErrorCode.INTERNAL_ERROR,
@@ -240,12 +142,6 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
       }
     }
 
-    // Trace the sign-in process with SignInHandler
-    const signinSpan = startSpan("auth_signin_signInHandler", {
-      email: email,
-      "request.id": requestId,
-    });
-
     try {
       await SignInHandler("credentials", {
         email,
@@ -253,30 +149,13 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
         redirectTo: DEFAULT_LOGIN_REDIRECT,
       });
 
-      signinSpan.end(); // End the sign-in handler span
-
-      logger.info("Sign-in successful", {
-        meta: { requestId, email },
-      });
-
       return { success: true, message: "Sign-in successful" };
     } catch (error: any) {
-      signinSpan.end(); // Ensure the span ends even in case of error
-
       if (isRedirectError(error)) {
-        logger.error("Redirect error during sign-in", {
-          meta: { requestId, email },
-          error: error.message,
-        });
         throw error;
       }
 
       if (error instanceof AuthError) {
-        logger.error("Authentication error", {
-          meta: { requestId, email },
-          error: error.message,
-        });
-
         return error.type === "CredentialsSignin"
           ? {
               success: false,
@@ -290,12 +169,6 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
             };
       }
 
-      // Catch-all for unexpected errors
-      logger.error("Unexpected error during sign-in", {
-        meta: { requestId, email },
-        error: error.message,
-      });
-
       return {
         success: false,
         code: ErrorCode.INTERNAL_ERROR,
@@ -303,18 +176,13 @@ export async function signIn(data: SignInSchemaType): Promise<FormResponse> {
       };
     }
   } catch (error: any) {
-    const errorResponse = handleServiceError(error, requestId);
-    return errorResponse;
-  } finally {
-    span.end(); // End the span for the entire sign-in process
+    return error;
   }
 }
 
 export async function signInWithEmailLink(
   data: EmailSignInLinkSchemaType
 ): Promise<FormResponse> {
-  const fingerprint = await getFullFingerprint();
-
   const validate = await EmailSignInLinkSchema.safeParseAsync(data);
   if (!validate.success) {
     return { message: validate.error.errors[0].message, success: false };
@@ -429,7 +297,7 @@ export async function forgotPasswordAction(
 
     const { email } = validate.data;
     // send email with reset password link
-    const existingUser = await UserService.getUserByEmail(email, { name: "b" });
+    const existingUser = await UserService.getUserByEmail(email);
     if (!existingUser) {
       return {
         message: "user may not exist or verified",
@@ -613,9 +481,7 @@ export async function resetPasswordAction(
     }
 
     // update password
-    const user = await UserService.getUserByEmail(tokenExists.email, {
-      name: "vvv",
-    });
+    const user = await UserService.getUserByEmail(tokenExists.email);
     if (!user) {
       return {
         message: "user may not exist or verified",

@@ -23,9 +23,7 @@ export async function upsertCategoryAction(
 
   // Proceed with upserting the category
   try {
-    const result = await CategoryService.upsertCategory(data, {
-      name: "CategoryService.upsertCategory",
-    });
+    const result = await CategoryService.upsertCategory(data);
     // revalidatePath("/dashboard/admin/categories");
     return {
       success: true,
@@ -43,9 +41,7 @@ export async function upsertCategoryAction(
 // Create deleteCategory action
 export async function deleteCategoryAction(id: string) {
   try {
-    const result = await CategoryService.deleteCategory(id, {
-      name: "CategoryService.deleteCategory",
-    });
+    const result = await CategoryService.deleteCategory(id);
     //   revalidatePath("/dashboard/admin/categories");
     return result;
   } catch (error) {
@@ -56,9 +52,7 @@ export async function deleteCategoryAction(id: string) {
 // Get categories action
 export async function getCategoriesAction(): Promise<ApiResponse<Category[]>> {
   try {
-    const categories = await CategoryService.getCategories({
-      name: "CategoryService.getCategoriesAction",
-    });
+    const categories = await CategoryService.getCategories();
 
     return {
       success: true,
@@ -77,9 +71,7 @@ export async function getCategoriesAction(): Promise<ApiResponse<Category[]>> {
 // Get category by ID action
 export async function getCategoryByIdAction(id: string) {
   try {
-    const category = await CategoryService.getCategoryById(id, {
-      name: "CategoryService.getCategoryById",
-    });
+    const category = await CategoryService.getCategoryById(id);
     return {
       success: true,
       data: category,

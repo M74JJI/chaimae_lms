@@ -79,9 +79,11 @@ export function NavMain({
                     {item.items?.map((subItem) => {
                       if (
                         (subItem.url === "/manage/promotions" &&
-                          course_statuses.status === "DRAFT") ||
+                          (course_statuses.status === "DRAFT" ||
+                            course_statuses.status === "SUBMITTED")) ||
                         (subItem.url === "/manage/students" &&
-                          course_statuses.status === "DRAFT")
+                          (course_statuses.status === "DRAFT" ||
+                            course_statuses.status === "SUBMITTED"))
                       )
                         return null;
                       return (

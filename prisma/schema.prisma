@@ -34,6 +34,8 @@ model User {
   payments PaymentDetails[]  @relation("PaymentDetailsToUser")
   orders            Order[]           @relation("UserOrders")
   reviews           Review[]          @relation("ReviewToUser")
+  lectureProgress UserLectureProgress[]
+  quizProgress    UserQuizProgress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -193,6 +195,8 @@ model Course {
   users           UserCourse[] @relation("UserCourses")
   cartItems       CartItem[] @relation("CourseToCartItem")
   reviews   Review[]         @relation("ReviewToCourse")
+  userProgress UserLectureProgress[]
+  quizProgress UserQuizProgress[]
 
   
   createdAt       DateTime       @default(now())
@@ -206,11 +210,13 @@ model UserCourse {
   courseId   String
   course     Course  @relation("UserCourses", fields: [courseId], references: [id], onDelete: Cascade)
   purchasedAt DateTime @default(now())
-  
+  completed   Boolean  @default(false)
+  completedAt DateTime?
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
 }
+
 
 model Section {
   id        String    @id @default(cuid())
@@ -242,6 +248,9 @@ model Lecture {
   videoLecture    VideoLecture?
   quizLecture     QuizLecture?
   exerciseLecture ExerciseLecture?
+
+  userProgress    UserLectureProgress[]
+  quizProgress    UserQuizProgress[]
 
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -294,6 +303,7 @@ model ExerciseLecture {
 }
 enum CourseStatus {
   DRAFT
+  SUBMITTED
   PUBLISHED
   ARCHIVED
 }
@@ -442,4 +452,37 @@ model Review {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([userId])
+}
+
+model UserLectureProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  lectureId String
+  lecture   Lecture  @relation(fields: [lectureId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  progress  Float    @default(0)
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lectureId])
+}
+
+model UserQuizProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  lectureId String
+  lecture   Lecture  @relation(fields: [lectureId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  score     Int
+  answers   Json
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lectureId])
 }

@@ -7,6 +7,10 @@ import {
   Section,
   VideoLecture,
 } from "@prisma/client";
+import {
+  getAllCoursesForAdminAction,
+  getAllSubmittedCoursesAction,
+} from "../actions/course.actions";
 
 export type CourseDataType = {
   title: string;
@@ -24,7 +28,7 @@ export type CourseDataType = {
   subcategoryId: string;
   languageId: string;
 };
-export type CourseStatusType = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+export type CourseStatusType = "DRAFT" | "SUBMITTED" | "PUBLISHED" | "ARCHIVED";
 
 export type DifficultyLevelType =
   | "BEGINNER"
@@ -84,3 +88,11 @@ export type CourseSectionType = Prisma.SectionGetPayload<{
 export type QuizLectureWithQuestionsType = QuizLecture & {
   questions: Question[];
 };
+
+export type AdminCourseType = Prisma.PromiseReturnType<
+  typeof getAllCoursesForAdminAction
+>[0];
+
+export type SubmittedCourseType = Prisma.PromiseReturnType<
+  typeof getAllSubmittedCoursesAction
+>[0];

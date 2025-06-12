@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
@@ -29,6 +30,7 @@ export function NavMain({
   items: DashboardLinksType;
   title: string;
 }) {
+  const { open } = useSidebar();
   const pathname = usePathname();
   return (
     <SidebarGroup>
@@ -44,28 +46,35 @@ export function NavMain({
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
-                  {/*  {item.icon && <item.icon />}*/}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem
-                      key={subItem.title}
-                      className={cn({
-                        "bg-sidebar-accent rounded-md":
-                          subItem.url === pathname,
-                      })}
-                    >
-                      <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
+                  {item.items?.map((subItem) => {
+                    const emojisOnly =
+                      subItem.title
+                        .match(
+                          /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu
+                        )
+                        ?.join("") || "";
+                    return (
+                      <SidebarMenuSubItem
+                        key={subItem.title}
+                        className={cn({
+                          "bg-sidebar-accent rounded-md":
+                            subItem.url === pathname,
+                        })}
+                      >
+                        <SidebarMenuSubButton asChild>
+                          <Link href={subItem.url}>
+                            <span>{open ? subItem.title : emojisOnly}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    );
+                  })}
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>

@@ -1,6 +1,8 @@
 "use server";
 
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { ErrorCode } from "@/types";
 
 export type SortOrder = "asc" | "desc";
 
@@ -186,4 +188,72 @@ export const getCourses = async (
     pageSize,
     totalCount,
   };
+};
+
+export const getAllCoursesForInstructorAction = async () => {
+  const session = await auth();
+  const instr = await db.instructorProfile.findFirst({
+    where: {
+      userId: session?.user.id,
+    },
+  });
+  if (!instr) {
+    throw {
+      success: false,
+      code: ErrorCode.DB_ERROR,
+      message: "Smth went wrong",
+    };
+  }
+  const courses = await db.course.findMany({
+    where: {
+      instructorProfile: {
+        id: instr.id,
+      },
+    },
+    include: {
+      category: true,
+      subcategory: true,
+
+      _count: {
+        select: {
+          sections: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+  return courses;
+};
+
+export const submitCourseForReview = async (course_id: string) => {
+  const session = await auth();
+  const instr = await db.instructorProfile.findFirst({
+    where: {
+      userId: session?.user.id,
+    },
+  });
+  if (!instr) {
+    throw {
+      success: false,
+      code: ErrorCode.DB_ERROR,
+      message: "Smth went wrong",
+    };
+  }
+  const course = await db.course.findUnique({
+    where: {
+      id: course_id,
+    },
+  });
+  if (course?.status === "SUBMITTED") return;
+  const updatedCourse = await db.course.update({
+    where: {
+      id: course_id,
+    },
+    data: {
+      status: "SUBMITTED",
+    },
+  });
+  return updatedCourse;
 };

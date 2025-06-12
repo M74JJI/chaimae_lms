@@ -98,6 +98,7 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
   // Hooks
   const { setOpen, setClose } = useModal();
   const [loading, setLoading] = useState(false);
+
   // const { toast } = useToast();
   const router = useRouter();
 
