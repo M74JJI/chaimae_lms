@@ -16,6 +16,7 @@ export const publicRoutes = new Set([
   "/course",
   "/course/cybersecurity-soc-analyst",
   "/cart",
+  "/browse",
 ]) as Readonly<Set<string>>;
 export const authRoutes = new Set([
   "/auth/signin",

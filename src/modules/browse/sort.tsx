@@ -4,118 +4,110 @@ import { Check, ChevronDown } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-const sortArray = [
+const sortOptions = [
   {
     name: "Most Popular",
     query: "most-popular",
+    icon: "🔥",
   },
   {
     name: "New Arrivals",
     query: "new-arrivals",
+    icon: "🆕",
   },
   {
     name: "Top Rated",
     query: "top-rated",
+    icon: "⭐",
   },
   {
-    name: "Price low to high",
+    name: "Price: Low to High",
     query: "price-low-to-high",
+    icon: "↗️",
   },
   {
-    name: "Price High to low",
+    name: "Price: High to Low",
     query: "price-high-to-low",
+    icon: "↘️",
   },
 ];
+
 export default function ProductSort() {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
   const pathname = usePathname();
-
   const { replace } = useRouter();
 
   const sortQuery = params.get("sort") || "most-popular";
-
-  const sort = sortQuery
-    ? sortArray.find((s) => s.query === sortQuery)?.name
-    : "Most Popular";
+  const currentSort =
+    sortOptions.find((s) => s.query === sortQuery) || sortOptions[0];
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSort = (sort: string) => {
     params.set("sort", sort);
     replace(`${pathname}?${params.toString()}`);
+    setIsOpen(false);
   };
 
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-
   return (
-    <div className="relative transition-all duration-[30ms]">
-      <div className="pr-[50px] inline-block relative">
-        <div className="flex">
-          <div className="h-9 w-[190px] md:w-[227px] !float-right">
-            <div className="h-9 w-[190px] md:w-[227px] !float-left">
-              <div
-                className="h-9 w-[190px] md:w-[227px] z-20 relative inline-block outline-0 group"
-                onMouseEnter={() => setIsMenuOpen(true)}
-                onMouseLeave={() => setIsMenuOpen(false)}
-              >
-                {/* Trigger */}
-                <div className="h-9 w-[190px] md:w-[227px]">
-                  <div className="inline-flex relative w-full">
-                    <div className="hidden relative md:block">
-                      <span className="w-[70px] h-full flex items-center justify-center absolute top-0 transition-all duration-[20ms]">
-                        <label htmlFor="">Sort by</label>
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      disabled
-                      value={sort}
-                      className="md:pl-[70px] text-sm font-bold h-9 pr-10 bg-none border cursor-pointer px-3 bg-transparent text-main-primary w-full outline-0 align-bottom"
-                    />
-                    <div className="relative">
-                      <span
-                        className="flex items-center justify-center box-border h-full w-10 absolute top-0 right-0 transition-transform duration-200 ease-in-out"
-                        style={{
-                          transform: isMenuOpen
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                        }}
-                      >
-                        <ChevronDown className="w-3" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                {/* Menu */}
-                <ul
-                  className={cn(
-                    "absolute bg-white max-h-72 py-2 shadow-2xl overflow-auto w-full transition-all duration-300 ease-in-out transform",
-                    {
-                      "opacity-100 translate-y-0": isMenuOpen,
-                      "opacity-0 -translate-y-2 pointer-events-none":
-                        !isMenuOpen,
-                    }
-                  )}
-                >
-                  {sortArray.map((option) => (
-                    <li
-                      key={option.query}
-                      className="w-full flex items-center justify-between bg-white hover:bg-gray-100 cursor-pointer h-8 px-4 text-xs"
-                      onClick={() => handleSort(option.query)}
-                    >
-                      <span
-                        className={cn({
-                          "font-bold": option.query === sortQuery,
-                        })}
-                      >
-                        {option.name}
-                      </span>
-                      {option.query === sortQuery && <Check className="w-3" />}
-                    </li>
-                  ))}
-                </ul>
+    <div className="relative">
+      {/* Sort Dropdown Trigger */}
+      <button
+        className={cn(
+          "flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white",
+          "hover:border-blue-300 hover:shadow-sm transition-all duration-200",
+          "focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400",
+          isOpen && "border-blue-400 shadow-sm ring-2 ring-blue-100"
+        )}
+        onClick={() => setIsOpen(!isOpen)}
+        onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+      >
+        <span className="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
+        <span className="font-medium text-gray-800 flex items-center gap-1">
+          {currentSort.icon && (
+            <span className="text-sm opacity-80">{currentSort.icon}</span>
+          )}
+          {currentSort.name}
+        </span>
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 text-gray-500 transition-transform duration-200",
+            isOpen && "rotate-180"
+          )}
+        />
+      </button>
+
+      {/* Dropdown Menu */}
+      <div
+        className={cn(
+          "absolute top-full right-0 mt-2 w-56 rounded-xl bg-white shadow-lg",
+          "border border-gray-100 overflow-hidden z-50 transition-all duration-200",
+          "origin-top-right transform-gpu",
+          isOpen
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95 pointer-events-none"
+        )}
+      >
+        <div className="py-1">
+          {sortOptions.map((option) => (
+            <button
+              key={option.query}
+              className={cn(
+                "w-full flex items-center justify-between px-4 py-2 text-sm",
+                "hover:bg-blue-50/50 transition-colors duration-150",
+                option.query === sortQuery && "bg-blue-50 text-blue-600"
+              )}
+              onClick={() => handleSort(option.query)}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm opacity-80">{option.icon}</span>
+                <span>{option.name}</span>
               </div>
-            </div>
-          </div>
+              {option.query === sortQuery && (
+                <Check className="w-4 h-4 text-blue-500" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -120,12 +120,7 @@ export const getCourses = async (
       subcategory: true,
       instructorProfile: {
         include: {
-          user: {
-            select: {
-              name: true,
-              image: true,
-            },
-          },
+          user: true,
         },
       },
     },

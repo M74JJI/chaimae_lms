@@ -63,29 +63,32 @@ const PriceFilter: FC = () => {
   }, [minPrice, maxPrice]);
 
   return (
-    <div className="pt-5 pb-4">
-      <div className="relative cursor-pointer flex items-center justify-between select-none">
-        <h3 className="text-sm font-bold overflow-ellipsis capitalize line-clamp-1 text-main-primary">
-          Price
-        </h3>
-      </div>
-      <div className="grid grid-cols-2 gap-x-2 mt-2.5">
-        <input
-          name="minPrice"
-          type="number"
-          value={minPrice}
-          onChange={handleMinPriceChange}
-          placeholder="Min Price"
-          className="h-[32px] w-20 text-main-primary bg-white border rounded-md text-xs pl-1"
-        />
-        <input
-          name="maxPrice"
-          type="number"
-          value={maxPrice}
-          onChange={handleMaxPriceChange}
-          placeholder="Max Price"
-          className="h-[32px] w-20 text-main-primary bg-white border rounded-md text-xs pl-1"
-        />
+    <div className="space-y-2 mt-4">
+      <h3 className="text-sm font-medium text-foreground">Price range</h3>
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <input
+            name="minPrice"
+            type="number"
+            value={minPrice}
+            onChange={handleMinPriceChange}
+            placeholder="Min"
+            min={0}
+            className="w-full p-2 text-sm border rounded bg-background "
+          />
+        </div>
+        <span className="text-muted-foreground">–</span>
+        <div className="relative flex-1">
+          <input
+            name="maxPrice"
+            type="number"
+            value={maxPrice}
+            onChange={handleMaxPriceChange}
+            placeholder="Max"
+            max={999999}
+            className="w-full p-2 text-sm border rounded bg-background "
+          />
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   BookOpen,
   GraduationCap,
@@ -15,8 +16,12 @@ import {
   Video,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function EduNestHero() {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <section className="relative bg-background overflow-hidden isolate">
       {/* Academic-themed gradient background */}
@@ -90,27 +95,46 @@ export default function EduNestHero() {
 
             {/* Academic CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Button
-                size="lg"
-                className="text-lg px-8 h-14 rounded-xl hover:shadow-lg transition-all group relative overflow-hidden bg-blue-600 hover:bg-blue-700"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative z-10 flex items-center gap-2">
-                  <Rocket className="h-5 w-5 transition-transform group-hover:rotate-45" />
-                  <span>Explore Courses</span>
-                </span>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-8 h-14 rounded-xl border-2 hover:bg-accent/5 hover:shadow-sm group bg-background/80 backdrop-blur-sm border-blue-300"
-              >
-                <div className="relative">
-                  <PlayCircle className="mr-2 h-5 w-5 text-blue-600 transition-transform group-hover:scale-110" />
-                  <div className="absolute inset-0 rounded-full bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <span>How EduNest Works</span>
-              </Button>
+              <Link href="/browse">
+                <Button
+                  size="lg"
+                  className="text-lg px-8 h-14 rounded-xl hover:shadow-lg transition-all group relative overflow-hidden bg-blue-600 hover:bg-blue-700"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Rocket className="h-5 w-5 transition-transform group-hover:rotate-45" />
+                    <span>Explore Courses</span>
+                  </span>
+                </Button>
+              </Link>
+
+              <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-lg px-8 h-14 rounded-xl border-2 hover:bg-accent/5 hover:shadow-sm group bg-background/80 backdrop-blur-sm border-blue-300"
+                  >
+                    <div className="relative">
+                      <PlayCircle className="mr-2 h-5 w-5 text-blue-600 transition-transform group-hover:scale-110" />
+                      <div className="absolute inset-0 rounded-full bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <span>How EduNest Works</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-4xl bg-transparent border-none p-0">
+                  <div className="aspect-video relative rounded-xl overflow-hidden bg-black">
+                    {/* Replace with your actual video embed */}
+                    <iframe
+                      className="w-full h-full"
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                      title="EduNest Platform Introduction"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* Student success metrics */}
@@ -122,7 +146,7 @@ export default function EduNestHero() {
                       key={i}
                       className="h-11 w-11 border-2 border-background hover:-translate-y-1 transition-transform hover:z-10 hover:shadow-md"
                     >
-                      <AvatarImage src={`/students/student-${i}.jpg`} />
+                      <AvatarImage src={`/assets/images/avatars/${i}.jpeg`} />
                       <AvatarFallback>S{i}</AvatarFallback>
                     </Avatar>
                   ))}

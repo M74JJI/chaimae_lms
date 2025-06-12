@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { CatgegoryWithSubsType } from "@/modules/admin/category/types";
 import { Minus, Plus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,15 +11,11 @@ export default function CategoryLink({
 }) {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
-
   const pathname = usePathname();
-
   const { replace } = useRouter();
 
-  // Params
   const categoryQuery = searchParams.get("category");
   const subCategoryQuery = searchParams.get("subCategory");
-
   const [expand, setExpand] = useState<boolean>(false);
 
   const handleCategoryChange = (category: string) => {
@@ -42,54 +39,77 @@ export default function CategoryLink({
     replace(`${pathname}?${params.toString()}`);
     setExpand(true);
   };
+
   return (
-    <div>
-      <section>
-        <div className="mt-2 leading-5 relative w-full flex items-center justify-between">
-          <label
-            htmlFor={category.id}
-            className="flex items-center text-left cursor-pointer whitespace-nowrap select-none"
-            onClick={() => handleCategoryChange(category.url)}
-          >
-            <span className="mr-2 border border-[#ccc] w-3 h-3 rounded-full relative grid place-items-center">
-              {category.url === categoryQuery && (
-                <div className="h-1.5 w-1.5 inline-block bg-black rounded-full"></div>
-              )}
-            </span>
-            <div className="flex-1 text-xs inline-block overflow-visible text-clip whitespace-normal">
-              {category.name}
-            </div>
-          </label>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <label
+          htmlFor={category.id}
+          className="flex items-center gap-2 cursor-pointer w-full py-1 group"
+          onClick={() => handleCategoryChange(category.url)}
+        >
           <span
-            className="cursor-pointer"
-            onClick={() => setExpand((prev) => !prev)}
+            className={cn(
+              "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+              category.url === categoryQuery
+                ? "border-primary bg-primary"
+                : "border-border group-hover:border-primary/50"
+            )}
           >
-            {expand ? <Minus className="w-3" /> : <Plus className="w-3" />}
+            {category.url === categoryQuery && (
+              <div className="w-2 h-2 rounded-full bg-background" />
+            )}
           </span>
-        </div>
-        {expand && (
-          <>
-            {category.subcategories.map((sub) => (
-              <section key={sub.id} className="pl-5 mt-2 leading-5 relative">
-                <label
-                  htmlFor={sub.id}
-                  className="w-full flex items-center text-left cursor-pointer whitespace-nowrap select-none"
-                  onClick={() => handleSubCategoryChange(sub.url)}
-                >
-                  <span className="mr-2 border border-[#ccc] w-3 h-3 rounded-full relative grid place-items-center">
-                    {sub.url === subCategoryQuery && (
-                      <div className="h-1.5 w-1.5 inline-block bg-black rounded-full"></div>
-                    )}
-                  </span>
-                  <div className="flex-1 text-xs inline-block overflow-visible text-clip whitespace-normal">
-                    {sub.name}
-                  </div>
-                </label>
-              </section>
-            ))}
-          </>
+          <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+            {category.name}
+          </span>
+        </label>
+
+        {category.subcategories.length > 0 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpand(!expand);
+            }}
+            className="text-muted-foreground hover:text-primary transition-colors"
+          >
+            {expand ? (
+              <Minus className="w-4 h-4" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
+          </button>
         )}
-      </section>
+      </div>
+
+      {expand && category.subcategories.length > 0 && (
+        <div className="ml-6 space-y-1.5">
+          {category.subcategories.map((sub) => (
+            <label
+              key={sub.id}
+              htmlFor={sub.id}
+              className="flex items-center gap-2 cursor-pointer py-1 group"
+              onClick={() => handleSubCategoryChange(sub.url)}
+            >
+              <span
+                className={cn(
+                  "w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors",
+                  sub.url === subCategoryQuery
+                    ? "border-primary bg-primary"
+                    : "border-border group-hover:border-primary/50"
+                )}
+              >
+                {sub.url === subCategoryQuery && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-background" />
+                )}
+              </span>
+              <span className="text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                {sub.name}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

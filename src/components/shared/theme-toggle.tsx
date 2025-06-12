@@ -1,7 +1,9 @@
 "use client";
+import { motion } from "framer-motion";
 
 import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle() {
   // Define theme names for consistency
@@ -44,34 +46,19 @@ export function ThemeToggle() {
           toggleTheme();
         }
       }}
-      aria-label="Toggle dark mode"
-      role="switch"
-      aria-checked={isDarkMode}
-      className={`relative inline-flex items-center w-20 h-10 rounded-full transition-all duration-500 
-      focus:outline-none focus-visible:ring-2 ${
-        isDarkMode
-          ? "focus-visible:ring-indigo-500"
-          : "focus-visible:ring-orange-400"
-      }`}
     >
-      {/* Background transition effect */}
-      <div
-        className={`absolute inset-0 rounded-full transition-all duration-500 ${
-          isDarkMode
-            ? "bg-gradient-to-r from-blue-400 to-indigo-500"
-            : "bg-gradient-to-r from-yellow-300 to-orange-400"
-        }`}
-      />
-
-      {/* Icon container (Moon/Sun) */}
-      <div
-        className={`absolute top-1 left-1 bg-white rounded-full h-8 w-8 flex items-center justify-center text-lg shadow-md 
-        transition-transform duration-500 ease-in-out ${
-          isDarkMode ? "translate-x-10" : "translate-x-0"
-        }`}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={toggleTheme}
+        className="p-2 cursor-pointer rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all"
+        aria-label="Toggle theme"
       >
-        {isDarkMode ? "🌙" : "☀️"}
-      </div>
+        {!isDarkMode ? (
+          <Moon className="w-5 h-5 text-gray-700" />
+        ) : (
+          <Sun className="w-5 h-5 text-yellow-400" />
+        )}
+      </motion.button>
     </button>
   );
 }

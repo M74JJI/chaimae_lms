@@ -3,7 +3,7 @@ import ProductFilters from "@/modules/browse/filters";
 import ProductSort from "@/modules/browse/sort";
 import { FiltersQueryType } from "@/modules/browse/types";
 import { getCourses } from "@/modules/course/actions";
-import CourseCard from "@/modules/course/components/card";
+import { CourseCard } from "@/modules/home/components/course-card";
 
 export default async function BrowsePage({
   searchParams,
@@ -29,28 +29,58 @@ export default async function BrowsePage({
   const { courses } = courses_data;
 
   return (
-    <div className="relative h-screen overflow-hidden">
-      {/* Header */}
-      <div className="fixed top-0 left-0 w-full z-10">
+    <div className="relative min-h-screen bg-blue-50/20">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
         <Header />
       </div>
 
-      {/* Filters Sidebar */}
-      <div className="fixed top-[124px] lg:top-20 left-2 md:left-4 pt-4 h-[calc(100vh-64px)] overflow-auto scrollbar">
-        <ProductFilters queries={queries} />
-      </div>
-      {/* Main Content */}
-      <div className="ml-[190px] md:ml-[220px] pt-[140px] lg:pt-24 right-5">
-        {/* Sort Section */}
-        <div className="sticky top-[64px] z-10 px-4 py-2 flex items-center">
-          <ProductSort />
+      {/* Main Content Area */}
+      <div className="pt-24 pb-12 container mx-auto px-4">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Browse All Courses
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Discover the perfect course for your learning journey
+          </p>
         </div>
 
-        {/* Product List */}
-        <div className="mt-2 px-4 w-full overflow-y-auto max-h-[calc(100vh-155px)] pb-28 scrollbar flex flex-wrap">
-          {courses.map((course, i) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+        <div className="flex lg:flex-row gap-8">
+          {/* Filters Sidebar - Styled to match theme */}
+          <div className="lg:w-64 flex-shrink-0">
+            <div className="sticky top-28 h-[calc(100vh-140px)] overflow-auto scrollbar pr-2">
+              <div className="bg-white rounded-xl border border-gray-200/60 p-6 shadow-sm">
+                <h2 className="text-sm font-semibold tracking-wider text-blue-600 uppercase mb-4">
+                  Filter Courses
+                </h2>
+                <ProductFilters queries={queries} />
+              </div>
+            </div>
+          </div>
+
+          {/* Course Listing Area */}
+          <div className="flex-1">
+            {/* Sort Controls - Styled to match theme */}
+            <div className="mb-6 bg-white rounded-xl border border-gray-200/60 p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  {courses.length} courses found
+                </span>
+                <ProductSort />
+              </div>
+            </div>
+
+            {/* Course Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
+
+            {/* Pagination would go here */}
+          </div>
         </div>
       </div>
     </div>

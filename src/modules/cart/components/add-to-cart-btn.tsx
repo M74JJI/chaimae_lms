@@ -15,7 +15,8 @@ export default function AddToCartButton({
   return (
     <div>
       <Button
-        variant="secondary"
+        variant="outline"
+        className="w-full h-14 rounded-xl text-lg font-semibold border-2"
         onClick={() =>
           addToCart({
             id,

@@ -8,27 +8,16 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
 import Image from "next/image";
-import Link from "next/link";
 import { CourseCarousel } from "@/modules/home/components/course-carousel";
-import { CategoriesGrid } from "@/modules/home/components/categories-grid";
 import { StatsBanner } from "@/modules/home/components/stats-banner";
 import { InstructorSpotlight } from "@/modules/home/components/instructor-spotlight";
 import { TestimonialsSection } from "@/modules/home/components/testimonials";
 import Header from "@/components/layout/header/header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Badge,
-  BarChart,
-  BookOpen,
-  ChevronRight,
-  Code,
-  GraduationCap,
-  MessageSquare,
-  PanelLeft,
-  ThumbsUp,
-} from "lucide-react";
+import { ChevronRight, GraduationCap } from "lucide-react";
 import HomeHero from "@/modules/home/components/hero";
 import Cta from "@/modules/home/components/cta";
+import Link from "next/link";
 
 export default async function Home() {
   // Fetch featured data from database
@@ -59,8 +48,7 @@ export default async function Home() {
         take: 4,
       }),
       db.category.findMany({
-        include: { subcategories: true },
-        take: 8,
+        take: 10,
       }),
     ]);
 
@@ -72,7 +60,7 @@ export default async function Home() {
       <HomeHero />
 
       {/* Trusted By Educational Institutions */}
-      <section className="py-16 bg-blue-50/50">
+      <section className="py-16 bg-blue-50/50 dark:!bg-black">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-sm font-semibold tracking-wider text-blue-600 uppercase mb-3">
@@ -86,15 +74,21 @@ export default async function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-center justify-center">
             {[
-              { name: "Harvard", logo: "/institutions/harvard.svg" },
-              { name: "Stanford", logo: "/institutions/stanford.svg" },
-              { name: "MIT", logo: "/institutions/mit.svg" },
-              { name: "Cambridge", logo: "/institutions/cambridge.svg" },
-              { name: "ETH Zurich", logo: "/institutions/eth.svg" },
+              { name: "Harvard", logo: "/assets/images/schools/harvard.png" },
+              {
+                name: "Stanford",
+                logo: "/assets/images/schools/stanford.webp",
+              },
+              { name: "MIT", logo: "/assets/images/schools/mit.png" },
+              {
+                name: "Cambridge",
+                logo: "/assets/images/schools/cambridge.png",
+              },
+              { name: "ETH Zurich", logo: "/assets/images/schools/eth.png" },
             ].map((institution) => (
               <div
                 key={institution.name}
-                className="flex items-center justify-center group"
+                className="flex items-center justify-center group cursor-pointer"
               >
                 <div className="relative h-16 w-32 transition-all duration-300 opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0">
                   <Image
@@ -124,40 +118,31 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
+      {/* Global Categories Section */}
       <section className="py-16 bg-blue-50/20">
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-12">
             <div>
               <h2 className="text-sm font-semibold tracking-wider text-blue-600 uppercase mb-2">
-                Knowledge Domains
+                Explore Learning Paths
               </h2>
               <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Explore Academic Fields
+                Discover a World of Knowledge
               </h3>
             </div>
-            <Button
-              variant="outline"
-              className="rounded-full border-blue-300 text-blue-600 hover:bg-blue-50/50 hover:text-blue-700 flex items-center gap-1"
-            >
-              View All
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <Link href="/browse">
+              <Button
+                variant="outline"
+                className="rounded-full border-blue-300 text-blue-600 hover:bg-blue-50/50 hover:text-blue-700 flex items-center gap-1"
+              >
+                View All
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              "Computer Science",
-              "Business Studies",
-              "Engineering",
-              "Health Sciences",
-              "Mathematics",
-              "Literature",
-              "Environmental Science",
-              "Psychology",
-              "Data Analytics",
-              "Education Theory",
-            ].map((category, index) => (
+            {categories.map((category, index) => (
               <div key={index} className="group/category relative h-full">
                 {/* Gradient background effect */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white to-blue-50/70 border border-gray-200/60 group-hover/category:border-blue-300/50 transition-all duration-300 shadow-sm group-hover/category:shadow-md -z-10" />
@@ -167,10 +152,10 @@ export default async function Home() {
                   {/* Creative text treatment */}
                   <div className="relative mb-4">
                     <span className="text-4xl font-bold text-gray-200/70 absolute -left-1 -top-3 group-hover/category:text-blue-100/80 transition-colors">
-                      {String.fromCharCode(65 + index)}
+                      {category.name.slice(0, 1)}
                     </span>
                     <h3 className="font-medium text-gray-900 group-hover/category:text-blue-600 transition-colors relative z-10 pl-6">
-                      {category.split(" ").map((word, i) => (
+                      {category.name.split(" ").map((word, i) => (
                         <span key={i} className="block leading-tight">
                           {word}
                         </span>
@@ -179,7 +164,10 @@ export default async function Home() {
                   </div>
 
                   {/* Interactive elements */}
-                  <div className="mt-auto pt-2">
+                  <Link
+                    href={`/browse?category=${category.url}`}
+                    className="mt-auto pt-2"
+                  >
                     <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover/category:text-blue-500 transition-colors">
                       <span>Browse courses</span>
                       <ChevronRight className="h-4 w-4 opacity-0 group-hover/category:opacity-100 transition-all duration-300 translate-x-0 group-hover/category:translate-x-1" />
@@ -189,7 +177,7 @@ export default async function Home() {
                     <div className="relative mt-2 h-px w-full bg-gray-200 overflow-hidden">
                       <div className="absolute left-0 top-0 h-full w-0 bg-gradient-to-r from-blue-400 to-blue-600 group-hover/category:w-full transition-all duration-500" />
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             ))}

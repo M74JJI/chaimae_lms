@@ -66,48 +66,64 @@ export default function FiltersHeader({
     setCurrentParams(params.toString()); // Trigger re-render with updated params
   };
   return (
-    <div className="pt-2.5 pb-5">
-      <div className="flex items-center justify-between h-4 leading-5">
-        <div className="text-sm font-bold">Filter ({queriesLength})</div>
+    <div className="space-y-3 pt-2.5 pb-5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-foreground">
+          Filters ({queriesLength})
+        </span>
         {queriesLength > 0 && (
-          <div
-            className="text-xs text-orange-background cursor-pointer hover:underline"
-            onClick={() => handleClearQueries()}
+          <button
+            onClick={handleClearQueries}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
           >
-            Clear All
-          </div>
+            Clear all
+          </button>
         )}
       </div>
-      {/* Display filters */}
-      <div className="mt-3 flex flex-wrap gap-2">
+
+      {/* Active filters */}
+      <div className="flex flex-wrap gap-2">
         {queriesArray.map(([queryKey, queryValue]) => {
           if (queryKey === "sort") return null;
           if (queryKey === "search" && queryValue === "") return null;
+
           const isArrayQuery = Array.isArray(queryValue);
           const queryValues = isArrayQuery ? queryValue : [queryValue];
 
-          return (
-            <div key={queryKey} className="flex flex-wrap gap-2">
-              {queryValues.map((value, index) => (
-                <div
-                  key={index}
-                  className="border cursor-pointer py-0.5 px-1.5 rounded-sm text-sm w-fit text-center"
+          return queryValues.map((value, index) => (
+            <div
+              key={`${queryKey}-${index}`}
+              className="flex items-center gap-1 px-2 py-1 text-sm rounded-full border bg-card hover:bg-accent transition-colors"
+            >
+              <span className="max-w-[120px] truncate text-foreground/90">
+                {value}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  isArrayQuery
+                    ? handleRemoveQuery(queryKey, queryValues, value)
+                    : handleRemoveQuery(queryKey);
+                }}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <span className="text-main-secondary overflow-hidden text-ellipsis whitespace-nowrap mr-2">
-                    {value}
-                  </span>
-                  <X
-                    className="w-3 text-main-secondary hover:text-black cursor-pointer inline-block"
-                    onClick={() => {
-                      isArrayQuery
-                        ? handleRemoveQuery(queryKey, queryValues, value) // Remove specific value from array query
-                        : handleRemoveQuery(queryKey); // Remove entire query
-                    }}
-                  />
-                </div>
-              ))}
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
-          );
+          ));
         })}
       </div>
     </div>

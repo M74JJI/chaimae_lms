@@ -161,6 +161,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
             </div>
 
             {/* Instructor and price */}
+            {/*
             <div className="flex items-center justify-between pt-3 border-t border-gray-200/70 group-hover/card:border-blue-200/50 transition-colors">
               <div className="flex items-center gap-2">
                 <div className="relative h-8 w-8 rounded-full overflow-hidden border-2 border-white shadow-sm group-hover/card:border-blue-100 transition-colors">
@@ -200,6 +201,7 @@ export function CourseCard({ course, variant = "default" }: CourseCardProps) {
                 )}
               </div>
             </div>
+         */}
           </div>
         </div>
       </div>
